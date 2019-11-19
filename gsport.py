@@ -121,18 +121,36 @@ def clear_cookies(options):
 
 def get_listing(options):
     cj = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
-    cj.load()
+    try:
+        cj.load()
+    except FileNotFoundError:
+        print("Not logged in")
+        exit(1)
     response = requests.get(options.host + '/data_api/' + options.project, cookies=cj)
-    datafiles = json.loads(response.text)
+    try:
+        datafiles = json.loads(response.text)
+    except json.decoder.JSONDecodeError:
+        print("[get_listing] Error reading response: ", response.text)
+        exit(1)
     for file in datafiles:
         print(file['name'])
 
 
 def download(options):
     cj = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
-    cj.load()
+    try:
+        cj.load()
+    except FileNotFoundError:
+        print("Not logged in")
+        exit(1)
     response = requests.get(options.host + '/data_api/' + options.project, cookies=cj)
-    datafiles = json.loads(response.text)
+
+    try:
+        datafiles = json.loads(response.text)
+    except json.decoder.JSONDecodeError:
+        print("[get_listing] Error reading response: ", response.text)
+        exit(1)
+
     fsize = 0
     for file in datafiles:
         if file['name'] == options.download:
@@ -153,9 +171,17 @@ def download(options):
 
 def download_all(options):
     cj = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
-    cj.load()
+    try:
+        cj.load()
+    except FileNotFoundError:
+        print("Not logged in")
+        exit(1)
     response = requests.get(options.host + '/data_api/' + options.project, cookies=cj)
-    datafiles = json.loads(response.text)
+    try:
+        datafiles = json.loads(response.text)
+    except json.decoder.JSONDecodeError:
+        print("[get_listing] Error reading response: ", response.text)
+        exit(1)
     for file in datafiles:
         fsize = file['size']
         local_filename = file['name']
@@ -187,4 +213,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        exit(1)
