@@ -32,6 +32,18 @@ Options
 """)
 
 
+def human_readable_eta(seconds):
+    days = seconds // 86400
+    hours = seconds // 3600 % 24
+    minutes = seconds // 60 % 60
+    seconds = seconds % 60
+    ret = str(round(days))+'d' if days > 0 else ''
+    ret += str(round(hours))+'h' if hours > 0 else ''
+    ret += str(round(minutes))+'m' if minutes > 0 else ''
+    ret += str(round(seconds))+'s' if seconds > 0 and minutes < 1 else ''
+    return ret
+
+
 def sizeofmetric_fmt(num, suffix='B'):
     for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
         if abs(num) < 1000.0:
@@ -98,6 +110,12 @@ class Options:
             print("[error] project with no other option, what do you want?")
             usage()
             exit(1)
+        if self.download is not None and self.download_all:
+            print("[error] cannot download one file and all files (option -d and -a)")
+            usage()
+            exit(1)
+        if not self.download_all:
+            self.threads = 1
 
 
 class Session:
@@ -158,24 +176,31 @@ class Session:
         self.logged_in = True
 
     def download_file(self, url, fsize):
-        print(url)
-        local_filename = url.split('/')[-1]
-        dsize = 0
-        start = time.time()
-        with requests.get(url, stream=True, cookies=self.cookies) as r:
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
-                        dsize += len(chunk)
-                        if self.options.threads == 1:
-                            print("\rDownloading " + local_filename + " " + sizeofmetric_fmt(fsize) + " " +
-                                  str(round(dsize / fsize * 100)) + "% " +
-                                  str(sizeofmetric_fmt(dsize // (time.time() - start))) + "/sec",
-                                  end='')
-                        else:
-                            self.queue.put([len(chunk), False])
-        self.queue.put([0, True])
+        try:
+            local_filename = url.split('/')[-1]
+            print("\rDownloading", local_filename)
+            dsize = 0
+            start = time.time()
+            with requests.get(url, stream=True, cookies=self.cookies) as r:
+                with open(local_filename, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:  # filter out keep-alive new chunks
+                            f.write(chunk)
+                            dsize += len(chunk)
+                            rate = dsize // (time.time() - start)
+                            if not self.options.download_all:
+                                print("\r" + sizeofmetric_fmt(fsize) + " " +
+                                      str(round(dsize / fsize * 100)) + "% " +
+                                      str(sizeofmetric_fmt(rate)) + "/sec ",
+                                      "ETA:", human_readable_eta((fsize - dsize) / rate),
+                                      end='     ')
+                            else:
+                                self.queue.put([len(chunk), False])
+            if self.options.download_all:
+                self.queue.put([0, True])
+
+        except KeyboardInterrupt:
+            return
 
     def logout(self):
         response = requests.get(self.options.host + '/accounts/logout/', cookies=self.cookies)
@@ -210,6 +235,7 @@ def download(session):
 
     url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
     session.download_file(url, fsize)
+    print()
 
 
 def download_all(session):
@@ -251,8 +277,13 @@ def download_all(session):
             downloaded_bytes += status[0]
             if status[1]:
                 current_processes -= 1
-            print("\r", sizeofmetric_fmt(downloaded_bytes), str(sizeofmetric_fmt(downloaded_bytes // (time.time() - start))) +
-                  "/sec", current_processes, end='')
+            rate = downloaded_bytes // (time.time() - start)
+            print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
+                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
+                  sizeofmetric_fmt(dl_sum),
+                  str(sizeofmetric_fmt(rate)) + "/sec",
+                  "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
+                  end='     ')
 
     except json.decoder.JSONDecodeError:
         print("[download_all] [get_listing] Error reading response: ", response.text)
