@@ -14,6 +14,7 @@ import sys
 import re
 import json
 import time
+import platform
 
 
 def usage():
@@ -244,13 +245,24 @@ def download_all(session):
         datafiles = json.loads(response.text)
         dl_list = []
         dl_sum = 0
+        linux = False
+        if platform.platform().startswith('Linux'):
+            linux = True
+        else:
+            print("Non-linux platform supports no multi-threaded downloading")
+            session.options.download_all = False
+
         for file in datafiles:
             fsize = file['size']
             dl_sum += fsize
             local_filename = file['name']
             url = session.options.host + '/session_files/' + session.options.project + '/' + local_filename
-
-            dl_list.append([url, fsize])
+            if linux:
+                dl_list.append([url, fsize])
+            else:
+                session.download_file(url, fsize)
+        if not linux:
+            exit(0)
 
         current_processes = 0
         max_processes = int(session.options.threads)
