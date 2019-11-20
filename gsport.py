@@ -6,6 +6,7 @@ N.J. de Water - Software Developer
 """
 
 from getpass import getpass
+from multiprocessing import Process, Pool, Queue
 import http.cookiejar
 import requests
 import getopt
@@ -50,12 +51,13 @@ class Options:
         self.no_options = True
         self.found_project = False
         self.clear_cookies = False
+        self.threads = 1
 
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "h:p:ld:acH",
+                                       "h:p:ld:acHt:",
                                        ["host=", "project=", "list",
-                                        "download=", "download-all",
+                                        "download=", "download-all", "threads"
                                         "clear-cookies", "help"])
 
         except getopt.GetoptError as err:
@@ -78,6 +80,8 @@ class Options:
             elif o in ("-d", "--download"):
                 self.download = a
                 self.no_options = False
+            elif o in ("-t", "--threads"):
+                self.threads = a
             elif o in ("-a", "--download-all"):
                 self.download_all = True
                 self.no_options = False
@@ -101,6 +105,9 @@ class Session:
         self.options = options
         self.cookies = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
         self.logged_in = False
+        self.queue = Queue()
+        self.process = Queue()
+
         try:
             self.cookies.load()
             if json.loads(requests.get(options.host + '/logged_in_api/', cookies=self.cookies).text)['logged_in']:
@@ -150,6 +157,26 @@ class Session:
         self.cookies = session.cookies
         self.logged_in = True
 
+    def download_file(self, url, fsize):
+        print(url)
+        local_filename = url.split('/')[-1]
+        dsize = 0
+        start = time.time()
+        with requests.get(url, stream=True, cookies=self.cookies) as r:
+            with open(local_filename, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+                        dsize += len(chunk)
+                        if self.options.threads == 1:
+                            print("\rDownloading " + local_filename + " " + sizeofmetric_fmt(fsize) + " " +
+                                  str(round(dsize / fsize * 100)) + "% " +
+                                  str(sizeofmetric_fmt(dsize // (time.time() - start))) + "/sec",
+                                  end='')
+                        else:
+                            self.queue.put([len(chunk), False])
+        self.queue.put([0, True])
+
     def logout(self):
         response = requests.get(self.options.host + '/accounts/logout/', cookies=self.cookies)
         if response.status_code == 200:
@@ -171,61 +198,65 @@ def get_listing(session):
 
 def download(session):
     response = requests.get(session.options.host + '/data_api/' + session.options.project, cookies=session.cookies)
-
-    try:
-        datafiles = json.loads(response.text)
-    except json.decoder.JSONDecodeError:
-        print("[get_listing] Error reading response: ", response.text)
-        exit(1)
-
     fsize = 0
-    for file in datafiles:
-        if file['name'] == session.options.download:
-            fsize = file['size']
-    local_filename = session.options.download.split('/')[-1]
-    url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
-    dsize = 0
-    start = time.time()
-    with requests.get(url, stream=True, cookies=cj) as r:
-        with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
-                    dsize += len(chunk)
-                    print("\rDownloading " + local_filename + " " + sizeofmetric_fmt(fsize) + " " +
-                          str(round(dsize/fsize*100)) + "% " +
-                          str(sizeofmetric_fmt(dsize//(time.time() - start))) + "/sec",
-                          end='')
-    print()
-
-
-def download_all(options):
-    cj = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
-    try:
-        cj.load()
-    except FileNotFoundError:
-        print("Not logged in")
-        exit(1)
-    response = requests.get(options.host + '/data_api/' + options.project, cookies=cj)
     try:
         datafiles = json.loads(response.text)
+        for file in datafiles:
+            if file['name'] == session.options.download:
+                fsize = file['size']
     except json.decoder.JSONDecodeError:
-        print("[get_listing] Error reading response: ", response.text)
+        print("[download] [get_listing] Error reading response: ", response.text)
         exit(1)
-    for file in datafiles:
-        fsize = file['size']
-        local_filename = file['name']
-        url = options.host + '/session_files/' + options.project + '/' + local_filename
-        dsize = 0
+
+    url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
+    session.download_file(url, fsize)
+
+
+def download_all(session):
+    response = requests.get(session.options.host + '/data_api/' + session.options.project, cookies=session.cookies)
+    try:
+        datafiles = json.loads(response.text)
+        dl_list = []
+        dl_sum = 0
+        for file in datafiles:
+            fsize = file['size']
+            dl_sum += fsize
+            local_filename = file['name']
+            url = session.options.host + '/session_files/' + session.options.project + '/' + local_filename
+
+            dl_list.append([url, fsize])
+
+        current_processes = 0
+        max_processes = int(session.options.threads)
+        number_of_processes = len(dl_list)
+        finished_processes = 0
+        current_process = 0
+        downloaded_bytes = 0
+        processes = []
+
+        for dl in dl_list:
+            processes.append(Process(target=session.download_file, args=dl))
+
         start = time.time()
-        with requests.get(url, stream=True, cookies=cj) as r:
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
-                        dsize += len(chunk)
-                        print("\rDownloading " + local_filename + " " + sizeofmetric_fmt(fsize) + " " + str(round(dsize/fsize*100)) + "% " + str(sizeofmetric_fmt(dsize//(time.time() - start))) + "/sec", end='')
-        print()
+
+        while True:
+            if current_processes < max_processes and finished_processes < number_of_processes:
+                processes[current_process].start()
+                current_process += 1
+                current_processes += 1
+            if current_processes < max_processes:
+                continue
+
+            status = session.queue.get()
+            downloaded_bytes += status[0]
+            if status[1]:
+                current_processes -= 1
+            print("\r", sizeofmetric_fmt(downloaded_bytes), str(sizeofmetric_fmt(downloaded_bytes // (time.time() - start))) +
+                  "/sec", current_processes, end='')
+
+    except json.decoder.JSONDecodeError:
+        print("[download_all] [get_listing] Error reading response: ", response.text)
+        exit(1)
 
 
 def main():
@@ -237,8 +268,8 @@ def main():
         get_listing(session)
     if options.download:
         download(session)
-    # if options.download_all:
-    #     download_all(session)
+    if options.download_all:
+        download_all(session)
 
 
 if __name__ == '__main__':
