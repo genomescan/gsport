@@ -279,7 +279,6 @@ def download_all(session):
 
         while True:
             if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
-                print(current_process)
                 processes[current_process].start()
                 current_process += 1
                 current_processes += 1
@@ -293,7 +292,7 @@ def download_all(session):
                 finished_processes += 1
             rate = downloaded_bytes // (time.time() - start)
             print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
-                  "Downloading", downloaded_bytes, "of",
+                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
                   sizeofmetric_fmt(dl_sum),
                   str(sizeofmetric_fmt(rate)) + "/sec",
                   "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
