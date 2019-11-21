@@ -278,24 +278,29 @@ def download_all(session):
         start = time.time()
 
         while True:
-            if current_processes < max_processes and finished_processes < number_of_processes:
+            if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
+                print(current_process)
                 processes[current_process].start()
                 current_process += 1
                 current_processes += 1
-            if current_processes < max_processes:
+            if current_processes < max_processes and current_process < number_of_processes :
                 continue
 
             status = session.queue.get()
             downloaded_bytes += status[0]
             if status[1]:
                 current_processes -= 1
+                finished_processes += 1
             rate = downloaded_bytes // (time.time() - start)
             print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
-                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
+                  "Downloading", downloaded_bytes, "of",
                   sizeofmetric_fmt(dl_sum),
                   str(sizeofmetric_fmt(rate)) + "/sec",
                   "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
                   end='     ')
+            if finished_processes == number_of_processes:
+                print("\nDownloading complete")
+                break
 
     except json.decoder.JSONDecodeError:
         print("[download_all] [get_listing] Error reading response: ", response.text)
