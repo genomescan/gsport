@@ -145,7 +145,6 @@ class Session:
         response = session.get(self.options.host + "/login/")
         csrftoken = response.cookies['csrftoken']
 
-        print("[login] Got response, csrf: " + csrftoken)
         username = ''
         first_try = True
         while re.search('name="password"', response.text) is not None or first_try:
@@ -159,7 +158,7 @@ class Session:
                                     headers=dict(Referer=self.options.host + "/login/"))
 
         csrftoken = re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text).group(1)
-        print("[login] Got response, csrf: " + csrftoken)
+
         first_try = True
         while re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text) is not None or first_try:
             if not first_try:
