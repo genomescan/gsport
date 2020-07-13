@@ -65,13 +65,15 @@ class Options:
         self.found_project = False
         self.clear_cookies = False
         self.threads = 1
+        self.dirs = False
+        self.dir = ''
 
         try:
             opts, args = getopt.getopt(argv[1:],
                                        "h:p:ld:acHt:",
                                        ["host=", "project=", "list",
                                         "download=", "download-all", "threads"
-                                        "clear-cookies", "help"])
+                                        "clear-cookies", "help", "dirs", "cd="])
 
         except getopt.GetoptError as err:
             print(err)
@@ -101,6 +103,11 @@ class Options:
             elif o in ("-c", "--clear-cookies"):
                 self.clear_cookies = True
                 self.no_options = False
+            elif o in ("--dirs",):
+                self.dirs = True
+            elif o in ("--cd",):
+                self.dir = a
+                self.dirs = False
             else:
                 assert False
         if (self.listing or self.download or self.download_all) and not self.found_project:
@@ -211,7 +218,11 @@ class Session:
 
 
 def get_listing(session):
-    response = requests.get(session.options.host + '/data_api/' + session.options.project, cookies=session.cookies)
+    response = requests.post(session.options.host + '/data_api/' +
+                             session.options.project +
+                             ('/y' if session.options.dirs is True else '/n'),
+                             cookies=session.cookies,
+                             data={"cd": session.options.dir})
     try:
         datafiles = json.loads(response.text)
         for file in datafiles:
@@ -222,7 +233,7 @@ def get_listing(session):
 
 
 def download(session):
-    response = requests.get(session.options.host + '/data_api/' + session.options.project, cookies=session.cookies)
+    response = requests.get(session.options.host + '/data_api/' + session.options.project + '/n', cookies=session.cookies)
     fsize = 0
     try:
         datafiles = json.loads(response.text)
@@ -239,7 +250,7 @@ def download(session):
 
 
 def download_all(session):
-    response = requests.get(session.options.host + '/data_api/' + session.options.project, cookies=session.cookies)
+    response = requests.get(session.options.host + '/data_api/' + session.options.project + "/n", cookies=session.cookies)
     try:
         datafiles = json.loads(response.text)
         dl_list = []
