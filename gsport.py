@@ -15,7 +15,7 @@ import re
 import json
 import time
 import platform
-
+import os
 
 def usage():
     print("""
@@ -23,13 +23,31 @@ Usage: gsport [options]
 GSPORT command-line tool for accessing GenomeScan Customer Portal
 
 Options
--h --host [host], default: https://portal.genomescan.nl
+-H --host [host], default: https://portal.genomescan.nl
 -p --project [project] project (required with -l, -d, -a)
 -l --list list
 -d --download [filename] download
 -a --download-all download all files from project -p or --project
 -c --clear-cookies clear session/cookies
--H --help prints this help
+-t --threads [n] allow n concurrent threads (works only on Linux)
+   --dirs show directories instead of files (combined with -l or --list)
+   --cd [dir] show files (or directories) in dir, 
+              dirs can be appended with forward slashes: / (eg. "Analysis/Sample 1", with quotes)
+              or Analysis/s1/bam (without spaces, no quotes needed)
+-r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given 
+-h --help prints this help
+
+Note: Using --dirs together with -r / --recursive has no effect
+
+Example usage: gsport -p 100000 -l shows all the files under that project
+               gsport -p 100000 -l --dirs shows all the folders/directories under that project
+               gsport -p 100000 -l --cd Analysis shows all the files under Analysis for that project
+               gsport -p 100000 -l -r shows all the files and folders in Analysis in a tree structure
+               gsport -p 100000 -l --dirs cd Analysis shows all the folders under Analysis for that project
+               gsport -p 100000 -a -r downloads all the files and folders for that project
+               gsport -p 100000 -a -r --cd Analysis downloads all the files and folder under Analysis for that project
+               gsport -p 100000 -a --cd Analysis downloads only the files directly under Analysis, no subfolder or files in there.
+               gsport -p 100000 -a --cd Analysis/s1 downloads only the files directly under Analysis/s1
 """)
 
 
@@ -67,13 +85,14 @@ class Options:
         self.threads = 1
         self.dirs = False
         self.dir = ''
+        self.recursive = False
 
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "h:p:ld:acHt:",
+                                       "H:p:ld:achrt:",
                                        ["host=", "project=", "list",
                                         "download=", "download-all", "threads"
-                                        "clear-cookies", "help", "dirs", "cd="])
+                                        "clear-cookies", "help", "dirs", "cd=", "recursive"])
 
         except getopt.GetoptError as err:
             print(err)
@@ -81,10 +100,10 @@ class Options:
             exit(1)
 
         for o, a in opts:
-            if o in ("-H", "--help"):
+            if o in ("-h", "--help"):
                 usage()
                 exit()
-            elif o in ("-h", "--host"):
+            elif o in ("-H", "--host"):
                 self.host = a
             elif o in ("-p", "--project"):
                 self.project = a
@@ -107,7 +126,8 @@ class Options:
                 self.dirs = True
             elif o in ("--cd",):
                 self.dir = a
-                self.dirs = False
+            elif o in ("-r", "--recursive"):
+                self.recursive = True
             else:
                 assert False
         if (self.listing or self.download or self.download_all) and not self.found_project:
@@ -182,14 +202,19 @@ class Session:
         self.cookies = session.cookies
         self.logged_in = True
 
-    def download_file(self, url, fsize):
+    def download_file(self, url, fsize, fname):
         try:
             local_filename = url.split('/')[-1]
-            print("\rDownloading", local_filename)
+            print("\nDownloading", fname)
             dsize = 0
             start = time.time()
             with requests.get(url, stream=True, cookies=self.cookies) as r:
-                with open(local_filename, 'wb') as f:
+                if self.options.dir != '':
+                    if not os.path.isdir(self.options.dir):
+                        os.makedirs(self.options.dir)
+                else:
+                    self.options.dir = '.'
+                with open(self.options.dir + "/" + fname, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
@@ -205,7 +230,6 @@ class Session:
                                 self.queue.put([len(chunk), False])
             if self.options.download_all:
                 self.queue.put([0, True])
-
         except KeyboardInterrupt:
             return
 
@@ -217,40 +241,79 @@ class Session:
             print("[logout] Error logging out.")
 
 
+def print_rec(dic, depth):
+    for item in dic:
+        if item['type'] == 'directory':
+            for i in range(depth*2):
+                print("  ", end='')
+            print("└──", item["name"])
+            print_rec(item['children'], depth+1)
+        else:
+            for i in range(depth*2):
+                print("  ", end='')
+            print("├──", item["name"], 'Size: ', item['size'], 'bytes')
+
+
 def get_listing(session):
-    response = requests.post(session.options.host + '/data_api/' +
-                             session.options.project +
-                             ('/y' if session.options.dirs is True else '/n'),
-                             cookies=session.cookies,
-                             data={"cd": session.options.dir})
-    try:
-        datafiles = json.loads(response.text)
-        for file in datafiles:
-            print(file['name'])
-    except json.decoder.JSONDecodeError:
-        print("[get_listing] Error reading response:", response.text)
-        exit(1)
+    if session.options.recursive:
+        response = requests.post(session.options.host + '/data_api_recursive/' +
+                                 session.options.project,
+                                 cookies=session.cookies,
+                                 data={"cd": session.options.dir})
+        try:
+            datafiles = json.loads(response.text)
+            print_rec(datafiles["children"], 0)
+        except json.decoder.JSONDecodeError:
+            print("[get_listing] Error reading response:", response.text)
+            exit(1)
+    else:
+        response = requests.post(session.options.host + '/data_api/' +
+                                 session.options.project +
+                                 ('/y' if session.options.dirs is True else '/n'),
+                                 cookies=session.cookies,
+                                 data={"cd": session.options.dir})
+        try:
+            datafiles = json.loads(response.text)
+            for file in datafiles:
+                print(file['name'])
+        except json.decoder.JSONDecodeError:
+            print("[get_listing] Error reading response:", response.text)
+            exit(1)
 
 
 def download(session):
-    response = requests.get(session.options.host + '/data_api/' + session.options.project + '/n', cookies=session.cookies)
+    response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
+                            cookies=session.cookies,
+                            data={"cd": session.options.dir})
     fsize = 0
+    fname = ''
     try:
         datafiles = json.loads(response.text)
         for file in datafiles:
             if file['name'] == session.options.download:
                 fsize = file['size']
+                if fsize == 0:
+                    fsize = 1
+                fname = file['name']
     except json.decoder.JSONDecodeError:
         print("[download] [get_listing] Error reading response: ", response.text)
         exit(1)
-
-    url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
-    session.download_file(url, fsize)
+    response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
+                        data={"project": session.options.project,
+                              "filename": "/" + session.options.dir + "/" +
+                                          session.options.download
+                              })
+    url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+    # url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
+    session.download_file(url, fsize, fname)
     print()
 
 
 def download_all(session):
-    response = requests.get(session.options.host + '/data_api/' + session.options.project + "/n", cookies=session.cookies)
+    response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
+                             cookies=session.cookies,
+                             data={"cd": session.options.dir})
+    print(response.text)
     try:
         datafiles = json.loads(response.text)
         dl_list = []
@@ -263,14 +326,21 @@ def download_all(session):
             session.options.download_all = False
 
         for file in datafiles:
-            fsize = file['size']
+            fsize = file['size'] if file['size'] != 0 else 1
+            print('fsize', fsize)
             dl_sum += fsize
             local_filename = file['name']
-            url = session.options.host + '/session_files/' + session.options.project + '/' + local_filename
+            response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
+                                     data={"project": session.options.project,
+                                           "filename": "/" + session.options.dir + "/" +
+                                                       file['name']
+                                           })
+            url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+
             if linux:
-                dl_list.append([url, fsize])
+                dl_list.append([url, fsize, file['name']])
             else:
-                session.download_file(url, fsize)
+                session.download_file(url, fsize, file['name'])
         if not linux:
             exit(0)
 
@@ -301,12 +371,13 @@ def download_all(session):
                 current_processes -= 1
                 finished_processes += 1
             rate = downloaded_bytes // (time.time() - start)
-            print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
-                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
-                  sizeofmetric_fmt(dl_sum),
-                  str(sizeofmetric_fmt(rate)) + "/sec",
-                  "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
-                  end='     ')
+            if dl_sum > 10:
+                print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
+                      "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
+                      sizeofmetric_fmt(dl_sum),
+                      str(sizeofmetric_fmt(rate)) + "/sec",
+                      "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
+                      end='     ')
             if finished_processes == number_of_processes:
                 print("\nDownloading complete")
                 break
