@@ -216,7 +216,7 @@ class Session:
                         os.makedirs(os.path.join(self.options.dir))
                 else:
                     self.options.dir = '.'
-                with open(os.path.join(self.options.dir, fname), 'wb') as f:
+                with open(fname, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
