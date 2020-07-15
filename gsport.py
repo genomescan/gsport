@@ -321,7 +321,10 @@ def get_list(res, session_dir):
             if item['type'] == 'directory':
                 d = os.path.join(path, item['name'])
                 if not os.path.isdir(d):
-                    os.makedirs(d)
+                    try:
+                        os.makedirs(d)
+                    except FileExistsError:
+                        pass  # this can be the case with multithreading
                 print_list(item['children'], d)
             else:
                 flist.append({"name": path + "/" + item["name"],
