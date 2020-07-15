@@ -2,6 +2,7 @@
 GSPORT command-line tool for accessing GenomeScan Customer Portal
 ---
 (C) GenomeScan B.V. 2019
+(C) GenomeScan B.V. 2020 - Update
 N.J. de Water - Software Developer
 """
 
@@ -205,7 +206,7 @@ class Session:
     def download_file(self, url, fsize, fname):
         try:
             local_filename = url.split('/')[-1]
-            print("\nDownloading", fname)
+            # print("\rDownloading", fname, '                                     ')
             dsize = 0
             start = time.time()
             with requests.get(url, stream=True, cookies=self.cookies) as r:
@@ -405,7 +406,7 @@ def download_all(session):
             current_processes -= 1
             finished_processes += 1
         rate = downloaded_bytes // (time.time() - start)
-        if dl_sum > 100:
+        if dl_sum > 100:  # preventing devision by zero errors
             print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
                   "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
                   sizeofmetric_fmt(dl_sum),
@@ -415,7 +416,6 @@ def download_all(session):
         if finished_processes == number_of_processes:
             print("\nDownloading complete")
             break
-
 
 
 def main():
