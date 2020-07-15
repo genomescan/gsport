@@ -84,7 +84,7 @@ class Options:
         self.clear_cookies = False
         self.threads = 1
         self.dirs = False
-        self.dir = ''
+        self.dir = '.'
         self.recursive = False
 
         try:
@@ -209,12 +209,14 @@ class Session:
             dsize = 0
             start = time.time()
             with requests.get(url, stream=True, cookies=self.cookies) as r:
+                self.options.dir = '/'.join(self.options.dir.split('/')[:-1])
+
                 if self.options.dir != '':
-                    if not os.path.isdir(self.options.dir):
-                        os.makedirs(self.options.dir)
+                    if not os.path.isdir(os.path.join(self.options.dir)):
+                        os.makedirs(os.path.join(self.options.dir))
                 else:
                     self.options.dir = '.'
-                with open(self.options.dir + "/" + fname, 'wb') as f:
+                with open(os.path.join(self.options.dir, fname), 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
@@ -309,82 +311,116 @@ def download(session):
     print()
 
 
-def download_all(session):
-    response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
-                             cookies=session.cookies,
-                             data={"cd": session.options.dir})
-    print(response.text)
-    try:
-        datafiles = json.loads(response.text)
-        dl_list = []
-        dl_sum = 0
-        linux = False
-        if platform.platform().startswith('Linux'):
-            linux = True
-        else:
-            print("Non-linux platform supports no multi-threaded downloading")
-            session.options.download_all = False
+def get_list(res, session_dir):
 
-        for file in datafiles:
-            fsize = file['size'] if file['size'] != 0 else 1
-            print('fsize', fsize)
-            dl_sum += fsize
-            local_filename = file['name']
-            response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                                     data={"project": session.options.project,
-                                           "filename": "/" + session.options.dir + "/" +
-                                                       file['name']
-                                           })
-            url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+    flist = []
 
-            if linux:
-                dl_list.append([url, fsize, file['name']])
+    def print_list(dic, path):
+        for item in dic:
+            if item['type'] == 'directory':
+                # print(path + "/" + item["name"])
+                d = os.path.join(path, item['name'])
+                print(d)
+                if not os.path.isdir(d):
+                    os.makedirs(d)
+                print_list(item['children'], d)
             else:
-                session.download_file(url, fsize, file['name'])
-        if not linux:
-            exit(0)
+                flist.append({"name": path + "/" + item["name"],
+                              "size": item["size"]})
 
-        current_processes = 0
-        max_processes = int(session.options.threads)
-        number_of_processes = len(dl_list)
-        finished_processes = 0
-        current_process = 0
-        downloaded_bytes = 0
-        processes = []
+    print_list(json.loads(res)['children'], session_dir)
+    return flist
 
-        for dl in dl_list:
-            processes.append(Process(target=session.download_file, args=dl))
 
-        start = time.time()
+def download_all(session):
+    datafiles = []
+    if session.options.recursive:
+        response = requests.post(session.options.host + '/data_api_recursive/' +
+                                 session.options.project,
+                                 cookies=session.cookies,
+                                 data={"cd": session.options.dir})
+        try:
+            datafiles = get_list(response.text, session.options.dir)
+            print(datafiles, session.options.dir)
+        except json.decoder.JSONDecodeError:
+            print("[get_listing] Error reading response:", response.text)
+            exit(1)
+    else:
+        response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
+                                 cookies=session.cookies,
+                                 data={"cd": session.options.dir})
+        try:
+            datafiles = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            print("[get_listing] Error reading response:", response.text)
+            exit(1)
 
-        while True:
-            if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
-                processes[current_process].start()
-                current_process += 1
-                current_processes += 1
-            if current_processes < max_processes and current_process < number_of_processes :
-                continue
+    dl_list = []
+    dl_sum = 0
+    linux = False
+    if platform.platform().startswith('Linux'):
+        linux = True
+    else:
+        print("Non-linux platform supports no multi-threaded downloading")
+        session.options.download_all = False
 
-            status = session.queue.get()
-            downloaded_bytes += status[0]
-            if status[1]:
-                current_processes -= 1
-                finished_processes += 1
-            rate = downloaded_bytes // (time.time() - start)
-            if dl_sum > 10:
-                print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
-                      "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
-                      sizeofmetric_fmt(dl_sum),
-                      str(sizeofmetric_fmt(rate)) + "/sec",
-                      "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
-                      end='     ')
-            if finished_processes == number_of_processes:
-                print("\nDownloading complete")
-                break
+    for file in datafiles:
+        fsize = file['size'] if file['size'] != 0 else 1
+        print('fsize', fsize)
+        dl_sum += fsize
+        local_filename = file['name']
+        filename = "/" + (session.options.dir if not session.options.recursive else '') + "/" + file['name']
+        response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
+                                 data={"project": session.options.project,
+                                       "filename": filename
+                                       })
+        url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
 
-    except json.decoder.JSONDecodeError:
-        print("[download_all] [get_listing] Error reading response: ", response.text)
-        exit(1)
+        if linux:
+            dl_list.append([url, fsize, file['name']])
+        else:
+            session.download_file(url, fsize, file['name'])
+    if not linux:
+        exit(0)
+
+    current_processes = 0
+    max_processes = int(session.options.threads)
+    number_of_processes = len(dl_list)
+    finished_processes = 0
+    current_process = 0
+    downloaded_bytes = 0
+    processes = []
+
+    for dl in dl_list:
+        processes.append(Process(target=session.download_file, args=dl))
+
+    start = time.time()
+
+    while True:
+        if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
+            processes[current_process].start()
+            current_process += 1
+            current_processes += 1
+        if current_processes < max_processes and current_process < number_of_processes :
+            continue
+
+        status = session.queue.get()
+        downloaded_bytes += status[0]
+        if status[1]:
+            current_processes -= 1
+            finished_processes += 1
+        rate = downloaded_bytes // (time.time() - start)
+        if dl_sum > 10:
+            print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
+                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
+                  sizeofmetric_fmt(dl_sum),
+                  str(sizeofmetric_fmt(rate)) + "/sec",
+                  "ETA:", human_readable_eta((dl_sum - downloaded_bytes) / rate),
+                  end='     ')
+        if finished_processes == number_of_processes:
+            print("\nDownloading complete")
+            break
+
 
 
 def main():
