@@ -125,7 +125,7 @@ class Options:
             elif o in ("--dirs",):
                 self.dirs = True
             elif o in ("--cd",):
-                self.dir = a
+                self.dir = a + "/"
             elif o in ("-r", "--recursive"):
                 self.recursive = True
             else:
@@ -318,9 +318,7 @@ def get_list(res, session_dir):
     def print_list(dic, path):
         for item in dic:
             if item['type'] == 'directory':
-                # print(path + "/" + item["name"])
                 d = os.path.join(path, item['name'])
-                print(d)
                 if not os.path.isdir(d):
                     os.makedirs(d)
                 print_list(item['children'], d)
@@ -341,7 +339,6 @@ def download_all(session):
                                  data={"cd": session.options.dir})
         try:
             datafiles = get_list(response.text, session.options.dir)
-            print(datafiles, session.options.dir)
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
@@ -366,9 +363,7 @@ def download_all(session):
 
     for file in datafiles:
         fsize = file['size'] if file['size'] != 0 else 1
-        print('fsize', fsize)
         dl_sum += fsize
-        local_filename = file['name']
         filename = "/" + (session.options.dir if not session.options.recursive else '') + "/" + file['name']
         response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
                                  data={"project": session.options.project,
@@ -410,7 +405,7 @@ def download_all(session):
             current_processes -= 1
             finished_processes += 1
         rate = downloaded_bytes // (time.time() - start)
-        if dl_sum > 10:
+        if dl_sum > 100:
             print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
                   "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
                   sizeofmetric_fmt(dl_sum),
