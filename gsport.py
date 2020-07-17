@@ -7,7 +7,8 @@ N.J. de Water - Software Developer
 """
 
 from getpass import getpass
-from multiprocessing import Process, Pool, Queue
+from multiprocessing import Process, Queue
+from pathlib import Path
 import http.cookiejar
 import requests
 import getopt
@@ -150,7 +151,7 @@ class Options:
 class Session:
     def __init__(self, options):
         self.options = options
-        self.cookies = http.cookiejar.MozillaCookieJar(filename='gs_cookies.txt')
+        self.cookies = http.cookiejar.MozillaCookieJar(filename=os.path.join(str(Path.home()), '.gs_cookies.txt'))
         self.logged_in = False
         self.queue = Queue()
         self.process = Queue()
@@ -168,7 +169,7 @@ class Session:
     def login(self):
         print("[login] Opening session...")
         session = requests.Session()
-        session.cookies = http.cookiejar.MozillaCookieJar('gs_cookies.txt')
+        session.cookies = http.cookiejar.MozillaCookieJar(os.path.join(str(Path.home()), '.gs_cookies.txt'))
         print("[login] Get login page")
         response = session.get(self.options.host + "/login/")
         csrftoken = response.cookies['csrftoken']
