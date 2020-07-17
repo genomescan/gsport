@@ -270,7 +270,7 @@ def get_listing(session):
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.post(session.options.host + '/data_api/' +
+        response = requests.post(session.options.host + '/data_api2/' +
                                  session.options.project +
                                  ('/y' if session.options.dirs is True else '/n'),
                                  cookies=session.cookies,
@@ -285,7 +285,7 @@ def get_listing(session):
 
 
 def download(session):
-    response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
+    response = requests.post(session.options.host + '/data_api2/' + session.options.project + '/n',
                             cookies=session.cookies,
                             data={"cd": session.options.dir})
     fsize = 0
@@ -347,7 +347,7 @@ def download_all(session):
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.post(session.options.host + '/data_api/' + session.options.project + '/n',
+        response = requests.post(session.options.host + '/data_api2/' + session.options.project + '/n',
                                  cookies=session.cookies,
                                  data={"cd": session.options.dir})
         try:
