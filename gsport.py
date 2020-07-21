@@ -258,10 +258,10 @@ def print_rec(dic, depth):
 
 def get_listing(session):
     if session.options.recursive:
-        response = requests.post(session.options.host + '/data_api_recursive/' +
-                                 session.options.project,
-                                 cookies=session.cookies,
-                                 data={"cd": session.options.dir})
+        response = requests.get(session.options.host + '/data_api_recursive/' +
+                                session.options.project,
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
         try:
             datafiles = json.loads(response.text)
             print_rec(datafiles["children"], 0)
@@ -269,11 +269,11 @@ def get_listing(session):
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.post(session.options.host + '/data_api2/' +
-                                 session.options.project +
-                                 ('/y' if session.options.dirs is True else '/n'),
-                                 cookies=session.cookies,
-                                 data={"cd": session.options.dir})
+        response = requests.get(session.options.host + '/data_api2/' +
+                                session.options.project +
+                                ('/y' if session.options.dirs is True else '/n'),
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
         try:
             datafiles = json.loads(response.text)
             for file in datafiles:
@@ -284,9 +284,9 @@ def get_listing(session):
 
 
 def download(session):
-    response = requests.post(session.options.host + '/data_api2/' + session.options.project + '/n',
+    response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
                             cookies=session.cookies,
-                            data={"cd": session.options.dir})
+                            params={"cd": session.options.dir})
     fsize = 0
     fname = ''
     try:
@@ -300,11 +300,11 @@ def download(session):
     except json.decoder.JSONDecodeError:
         print("[download] [get_listing] Error reading response: ", response.text)
         exit(1)
-    response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                        data={"project": session.options.project,
-                              "filename": "/" + session.options.dir + "/" +
-                                          session.options.download
-                              })
+    response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
+                            params={"project": session.options.project,
+                                    "filename": "/" + session.options.dir + "/" +
+                                    session.options.download
+                                    })
     url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
     # url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
     session.download_file(url, fsize, fname)
@@ -336,19 +336,19 @@ def get_list(res, session_dir):
 def download_all(session):
     datafiles = []
     if session.options.recursive:
-        response = requests.post(session.options.host + '/data_api_recursive/' +
-                                 session.options.project,
-                                 cookies=session.cookies,
-                                 data={"cd": session.options.dir})
+        response = requests.get(session.options.host + '/data_api_recursive/' +
+                                session.options.project,
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
         try:
             datafiles = get_list(response.text, session.options.dir)
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.post(session.options.host + '/data_api2/' + session.options.project + '/n',
-                                 cookies=session.cookies,
-                                 data={"cd": session.options.dir})
+        response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
         try:
             datafiles = json.loads(response.text)
         except json.decoder.JSONDecodeError:
@@ -368,10 +368,10 @@ def download_all(session):
         fsize = file['size'] if file['size'] != 0 else 1
         dl_sum += fsize
         filename = "/" + (session.options.dir if not session.options.recursive else '') + "/" + file['name']
-        response = requests.post(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                                 data={"project": session.options.project,
-                                       "filename": filename
-                                       })
+        response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
+                                params={"project": session.options.project,
+                                        "filename": filename
+                                        })
         url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
 
         if linux:
