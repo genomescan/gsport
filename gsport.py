@@ -31,7 +31,7 @@ Options
 -d --download [filename] download
 -a --download-all download all files from project -p or --project
 -c --clear-cookies clear session/cookies
--t --threads [n] allow n concurrent threads (works only on Linux)
+-t --workers [n] allow n concurrent workers (defaults to number of logical cpu cores) (works only on Linux)
    --dirs show directories instead of files (combined with -l or --list)
    --cd [dir] show files (or directories) in dir, 
               dirs can be appended with forward slashes: / (eg. "Analysis/Sample 1", with quotes)
@@ -84,7 +84,7 @@ class Options:
         self.no_options = True
         self.found_project = False
         self.clear_cookies = False
-        self.threads = 1
+        self.threads = os.cpu_count()
         self.dirs = False
         self.dir = '.'
         self.recursive = False
@@ -93,7 +93,7 @@ class Options:
             opts, args = getopt.getopt(argv[1:],
                                        "H:p:ld:achrt:",
                                        ["host=", "project=", "list",
-                                        "download=", "download-all", "threads"
+                                        "download=", "download-all", "threads",
                                         "clear-cookies", "help", "dirs", "cd=", "recursive"])
 
         except getopt.GetoptError as err:
@@ -206,8 +206,6 @@ class Session:
 
     def download_file(self, url, fsize, fname):
         try:
-            local_filename = url.split('/')[-1]
-            # print("\rDownloading", fname, '                                     ')
             dsize = 0
             start = time.time()
             with requests.get(url, stream=True, cookies=self.cookies) as r:
