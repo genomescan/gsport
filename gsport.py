@@ -19,6 +19,12 @@ import time
 import platform
 import os
 
+
+GSPORT_VERSION = "1.6.1"
+
+def version():
+    print(GSPORT_VERSION)
+
 def usage():
     print("""
 Usage: gsport [options]
@@ -38,6 +44,7 @@ Options
               or Analysis/s1/bam (without spaces, no quotes needed)
 -r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given 
 -h --help prints this help
+-v --version show gsport version
 
 Note: Using --dirs together with -r / --recursive has no effect
 
@@ -91,9 +98,9 @@ class Options:
 
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "H:p:ld:achrt:",
+                                       "H:p:ld:achrvt:",
                                        ["host=", "project=", "list",
-                                        "download=", "download-all", "threads",
+                                        "download=", "download-all", "threads", "version"
                                         "clear-cookies", "help", "dirs", "cd=", "recursive"])
 
         except getopt.GetoptError as err:
@@ -130,6 +137,9 @@ class Options:
                 self.dir = a + "/"
             elif o in ("-r", "--recursive"):
                 self.recursive = True
+            elif o in ("-v", "--version"):
+                version()
+                exit()
             else:
                 assert False
         if (self.listing or self.download or self.download_all) and not self.found_project:
@@ -195,7 +205,9 @@ class Session:
             first_try = False
             login_data = dict(token=input("Token: "), username=username, csrfmiddlewaretoken=csrftoken, next='/')
             response = session.post(self.options.host + "/otp_ok/", data=login_data,
-                                    headers=dict(Referer=self.options.host + "/login/"))
+                                    headers={"Referer": self.options.host + "/login/",
+                                             "User-Agent": "gsport " + GSPORT_VERSION
+                                             })
 
         print("[login] Success, saving cookies...")
         session.cookies.save(ignore_discard=True)
