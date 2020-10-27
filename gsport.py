@@ -20,10 +20,12 @@ import platform
 import os
 
 
-GSPORT_VERSION = "1.6.1"
+GSPORT_VERSION = "1.6.2"
+
 
 def version():
     print(GSPORT_VERSION)
+
 
 def usage():
     print("""
@@ -246,6 +248,7 @@ class Session:
                 self.queue.put([0, True])
         except KeyboardInterrupt:
             return
+        return
 
     def logout(self):
         response = requests.get(self.options.host + '/accounts/logout/', cookies=self.cookies)
@@ -405,10 +408,11 @@ def download_all(session):
         processes.append(Process(target=session.download_file, args=dl))
 
     start = time.time()
-
+    started = []
     while True:
         if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
             processes[current_process].start()
+            started.append(processes[current_process])
             current_process += 1
             current_processes += 1
         if current_processes < max_processes and current_process < number_of_processes :
@@ -416,6 +420,12 @@ def download_all(session):
 
         status = session.queue.get()
         downloaded_bytes += status[0]
+        for process in started:
+            if not process.is_alive():
+                if process.exitcode is not None:
+                    process.close()
+                    started.remove(process)
+
         if status[1]:
             current_processes -= 1
             finished_processes += 1
