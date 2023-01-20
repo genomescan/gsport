@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 GSPORT command-line tool for accessing GenomeScan Customer Portal
 ---
