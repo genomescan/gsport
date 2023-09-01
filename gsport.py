@@ -420,6 +420,23 @@ def download_all(session):
                                 params={"cd": session.options.dir})
         try:
             datafiles = json.loads(response.text)
+
+            # Obtain the MD5 hash of the files, when the file to download is a '.gz' file.
+            for file in datafiles:
+                if file['name'] == 'checksums.md5':
+                    # Get the code to obtain the file
+                    response = requests.get( session.options.host + '/gen_session_file/', cookies = session.cookies,
+                                             params = {"project": session.options.project,
+                                                       "filename": "/" + session.options.dir + "/" +
+                                                                   file['name']
+                                                       } )
+                    # Create the URL to obtain the file (one time use)
+                    url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+                    md5 = requests.get( url, stream = True, cookies = session.cookies )
+
+                    # Split the MD5 file to a list<str,str>
+                    session.md5List.extend( [list.split('  ') for list in md5.text.split("\n")] )
+
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
