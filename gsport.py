@@ -37,9 +37,9 @@ GSPORT command-line tool for accessing GenomeScan Customer Portal
 Options
 -H --host [host], default: https://portal.genomescan.nl
 -p --project [project] project (required with -l, -d, -a)
--l --list list
--ls --list-size list size of the file
--d --download [filename] download
+-l --list return a list of all files
+-s --size return a list with the size
+-d --download [filename]
 -a --download-all download all files from project -p or --project
 -f --force downloading files even if they already exist 
 -c --clear-cookies clear session/cookies
@@ -107,9 +107,9 @@ class Options:
 
         try:
             opts, args = getopt.getopt(argv[1:],
-                                       "H:p:ld:achrvt:",
-                                       ["host=", "project=", "list",
-                                        "download=", "download-all", "threads", "version"
+                                       "H:p:lsd:afchrvt:",
+                                       ["host=", "project=", "list", "size",
+                                        "download=", "download-all", "force", "threads", "version"
                                         "clear-cookies", "help", "dirs", "cd=", "recursive"])
 
         except getopt.GetoptError as err:
@@ -129,7 +129,7 @@ class Options:
             elif o in ("-l", "--list"):
                 self.listing = True
                 self.no_options = False
-            elif o in ("-ls", "--list-size"):
+            elif o in ("-s", "--size"):
                 self.listing = True
                 self.listingSize = True
                 self.no_options = False
