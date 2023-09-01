@@ -10,6 +10,7 @@ N.J. de Water - Software Developer
 from getpass import getpass
 from multiprocessing import Process, Queue
 from pathlib import Path
+import hashlib
 import http.cookiejar
 import requests
 import getopt
@@ -21,7 +22,7 @@ import platform
 import os
 
 
-GSPORT_VERSION = "1.6.2"
+GSPORT_VERSION = "1.7.0"
 
 
 def version():
@@ -37,8 +38,10 @@ Options
 -H --host [host], default: https://portal.genomescan.nl
 -p --project [project] project (required with -l, -d, -a)
 -l --list list
+-ls --list-size list size of the file
 -d --download [filename] download
 -a --download-all download all files from project -p or --project
+-f --force downloading files even if they already exist 
 -c --clear-cookies clear session/cookies
 -t --workers [n] allow n concurrent workers (defaults to number of logical cpu cores) (works only on Linux)
    --dirs show directories instead of files (combined with -l or --list)
@@ -52,6 +55,7 @@ Options
 Note: Using --dirs together with -r / --recursive has no effect
 
 Example usage: gsport -p 100000 -l shows all the files under that project
+               gsport -p 100000 -ls shows all the files under that project with the filesize
                gsport -p 100000 -l --dirs shows all the folders/directories under that project
                gsport -p 100000 -l --cd Analysis shows all the files under Analysis for that project
                gsport -p 100000 -l -r shows all the files and folders in Analysis in a tree structure
@@ -87,8 +91,10 @@ class Options:
     def __init__(self, argv):
         self.download = None
         self.download_all = False
+        self.force = False
         self.host = "https://portal.genomescan.nl/"
         self.listing = False
+        self.listingSize = False
         self.help = False
         self.project = None
         self.no_options = True
@@ -123,6 +129,10 @@ class Options:
             elif o in ("-l", "--list"):
                 self.listing = True
                 self.no_options = False
+            elif o in ("-ls", "--list-size"):
+                self.listing = True
+                self.listingSize = True
+                self.no_options = False
             elif o in ("-d", "--download"):
                 self.download = a
                 self.no_options = False
@@ -131,6 +141,8 @@ class Options:
             elif o in ("-a", "--download-all"):
                 self.download_all = True
                 self.no_options = False
+            elif o in ("-f", "--force"):
+                self.force = True
             elif o in ("-c", "--clear-cookies"):
                 self.clear_cookies = True
                 self.no_options = False
@@ -146,7 +158,7 @@ class Options:
             else:
                 assert False
         if (self.listing or self.download or self.download_all) and not self.found_project:
-            print("[error] listing, download and download all require a project")
+            print("[error] listing, list size, download and download all require a project")
             usage()
             exit(1)
         if self.found_project and self.no_options:
@@ -164,6 +176,7 @@ class Options:
 class Session:
     def __init__(self, options):
         self.options = options
+        self.md5List = []
         self.cookies = http.cookiejar.MozillaCookieJar(filename=os.path.join(str(Path.home()), '.gs_cookies.txt'))
         self.logged_in = False
         self.queue = Queue()
@@ -231,6 +244,18 @@ class Session:
                         os.makedirs(os.path.join(self.options.dir))
                 else:
                     self.options.dir = '.'
+
+                # With force parameter, you will always re-download, even if the file exists and is the same.
+                if not self.options.force and os.path.exists( fname ):
+                    md5Hash = hashlib.md5( open( fname, 'rb' ).read() ).hexdigest()
+
+                    # Only skip if the MD5 hash + filename exists in the md5List.
+                    if [md5Hash, fname] in self.md5List:
+                        print( 'File "' + fname + '" already exists and MD5 check is valid. Skipping download...' )
+                        return
+                    else:
+                        print( 'File "' + fname + '" exists but MD5 does not match. Downloading...' )
+
                 with open(fname, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
@@ -245,6 +270,14 @@ class Session:
                                       end='     ')
                             else:
                                 self.queue.put([len(chunk), False])
+
+                if os.path.exists( fname ):
+                    md5Hash = hashlib.md5( open( fname, 'rb' ).read() ).hexdigest()
+                    if [md5Hash, fname] in self.md5List:
+                        print( 'File "' + fname + '" successfully downloaded.' )
+                    else:
+                        print( 'File "' + fname + '" downloaded but did not pass the MD5 check.' )
+
             if self.options.download_all:
                 self.queue.put([0, True])
         except KeyboardInterrupt:
@@ -293,7 +326,10 @@ def get_listing(session):
         try:
             datafiles = json.loads(response.text)
             for file in datafiles:
-                print(file['name'])
+                if session.options.listingSize:
+                    print(file['name'] + '   (' + sizeofmetric_fmt( file['size'] ) + ')')
+                else:
+                    print(file['name'])
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
@@ -307,6 +343,24 @@ def download(session):
     fname = ''
     try:
         datafiles = json.loads(response.text)
+
+        # Obtain the MD5 hash of the files, when the file to download is a '.gz' file.
+        if '.gz' in session.options.download:
+            for file in datafiles:
+                if file['name'] == 'checksums.md5':
+                    # Get the code to obtain the file
+                    response = requests.get( session.options.host + '/gen_session_file/', cookies = session.cookies,
+                                             params = {"project": session.options.project,
+                                                       "filename": "/" + session.options.dir + "/" +
+                                                                   file['name']
+                                                       } )
+                    # Create the URL to obtain the file (one time use)
+                    url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+                    md5 = requests.get( url, stream = True, cookies = session.cookies )
+
+                    # Split the MD5 file to a list<str,str>
+                    session.md5List.extend( [list.split('  ') for list in md5.text.split("\n")] )
+
         for file in datafiles:
             if file['name'] == session.options.download:
                 fsize = file['size']
@@ -322,7 +376,6 @@ def download(session):
                                     session.options.download
                                     })
     url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
-    # url = session.options.host + '/session_files/' + session.options.project + '/' + session.options.download
     session.download_file(url, fsize, fname)
     print()
 
@@ -416,7 +469,7 @@ def download_all(session):
             started.append(processes[current_process])
             current_process += 1
             current_processes += 1
-        if current_processes < max_processes and current_process < number_of_processes :
+        if current_processes < max_processes and current_process < number_of_processes:
             continue
 
         status = session.queue.get()
