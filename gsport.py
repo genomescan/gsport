@@ -345,7 +345,7 @@ def download(session):
         datafiles = json.loads(response.text)
 
         # Obtain the MD5 hash of the files, when the file to download is a '.gz' file.
-        if '.gz' in session.options.download:
+        if not session.md5List and '.gz' in session.options.download:
             for file in datafiles:
                 if file['name'] == 'checksums.md5':
                     # Get the code to obtain the file
