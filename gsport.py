@@ -637,12 +637,16 @@ def download_all( session ):
             finished_processes += 1
         rate = downloaded_bytes // (time.time() - start)
         if dl_sum > 100:  # preventing devision by zero errors
-            print( "\r", str( round( downloaded_bytes / dl_sum * 100 ) ) + "%",
-                   "Downloading", sizeofmetric_fmt( downloaded_bytes ), "of",
-                   sizeofmetric_fmt( dl_sum ),
-                   str( sizeofmetric_fmt( rate ) ) + "/sec",
-                   "ETA:", human_readable_eta( (dl_sum - downloaded_bytes) / rate ),
-                   end = '     ' )
+            estimatedtimeofarrival="Never" #it was this or "After the heat death of the universe"
+            if rate > 0:
+                  estimatedtimeofarrival=human_readable_eta((dl_sum - downloaded_bytes) / rate) 
+            print("\r", str(round(downloaded_bytes / dl_sum * 100))+"%",
+                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
+                  sizeofmetric_fmt(dl_sum),
+                  str(sizeofmetric_fmt(rate)) + "/sec",
+                  "ETA:", estimatedtimeofarrival,
+                  end='     ')
+
         if finished_processes == number_of_processes:
             print( "\nDownloading complete" )
             break
