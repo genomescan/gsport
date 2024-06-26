@@ -7,7 +7,7 @@ setuptools.setup(
     name="gsport", # Replace with your own username
     version="1.6.1",
     author="Niels de Water",
-    install_requires=['requests==2.22.0'],
+    install_requires=['requests==2.31.0'],
     author_email="n.dewater@genomescan.nl",
     description="GSPORT download tool for GenomeScan data from customer portal in command-line interface",
     long_description=long_description,
