@@ -1,7 +1,7 @@
 
 # GSport
 
-GSport is a command-line program designed to accelerate file downloads from the customer portal by the use of  the many processes . This significantly improves download speeds and efficiency, making the process faster.
+GSport is a command-line program designed to accelerate file downloads from the customer portal by the use of many processes . This significantly improves download speeds and efficiency, making the process faster.
 
 ## Improvements
 
