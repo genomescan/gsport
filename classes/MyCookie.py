@@ -1,10 +1,11 @@
-from http.cookiejar import MozillaCookieJar
 import threading
+from http.cookiejar import MozillaCookieJar
+
 
 class MyCookieJar(MozillaCookieJar):
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['_cookies_lock']
+        del state["_cookies_lock"]
         return state
 
     def __setstate__(self, state):

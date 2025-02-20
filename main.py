@@ -1,7 +1,8 @@
 import sys
 
-from helpers import get_listing, download, download_all
-from classes import *
+from classes import Options, Session
+from helpers import download, download_all, get_listing
+
 
 def main():
     options = Options(sys.argv)
@@ -16,7 +17,7 @@ def main():
         download_all(session)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
