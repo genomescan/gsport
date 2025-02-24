@@ -35,10 +35,10 @@ class Session:
             if json.loads(requests.get(options.host + "/logged_in_api/", cookies=self.cookies).text)["logged_in"]:
                 self.logged_in = True
             else:
-                self.login()
+                self.login("ds", "sd")
         except FileNotFoundError:
             print("[session] No cookies found. Logging in...")
-            self.login()
+            self.login("ds", "sd")
 
     def readFiles(self, options):
         if options.includeFile and os.path.exists(options.includeFile):
@@ -51,7 +51,7 @@ class Session:
             lines = open(options.checksumFile, "r").read()
             self.localMd5List.extend([list.split(", ") for list in lines.split("\n") if list.split(", ") != [""]])
 
-    def login(self):
+    def login(self, username, password):
         print("[login] Opening session...")
         session = requests.Session()
         session.cookies = MyCookieJar(os.path.join(str(Path.home()), ".gs_cookies.txt"))
@@ -59,15 +59,15 @@ class Session:
         response = session.get(self.options.host + "/login/")
         csrftoken = response.cookies["csrftoken"]
 
-        username = ""
+        username = "mario"
+        username = "dsds"
         first_try = True
         while re.search('name="password"', response.text) is not None or first_try:
             if not first_try:
                 print("[login] Invalid credentials")
             first_try = False
-            username = input("Username: ")
             login_data = dict(
-                username=username, password=getpass("Password: "), csrfmiddlewaretoken=csrftoken, next="/"
+                username=username, password=password, csrfmiddlewaretoken=csrftoken, next="/"
             )
             response = session.post(
                 self.options.host + "/login/", data=login_data, headers=dict(Referer=self.options.host + "/login/")

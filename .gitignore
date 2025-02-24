@@ -1,3 +1,5 @@
 /gsport.egg-info/
 /venv/
 .idea/
+__pycache__/
+*.pyc
