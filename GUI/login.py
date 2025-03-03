@@ -11,6 +11,7 @@ class LoginPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.log = False
         self.theme = "dark"
+        self.frameManager = container
 
         sv_ttk.set_theme(self.theme)
 
@@ -41,7 +42,7 @@ class LoginPage(tk.Frame):
 
                 login_button.pack_forget()
 
-                token_button = ttk.Button(self, text="Send token",command=sendToken(session, username, tokentxt.get(), response, csrftoken))
+                token_button = ttk.Button(self, text="Send token",command=lambda: sendToken(session, username, tokentxt.get(), response, csrftoken, self.frameManager))
                 token_button.pack(pady=10)
 
         # <======== FONTS ========>

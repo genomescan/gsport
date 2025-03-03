@@ -3,11 +3,15 @@ from pathlib import Path
 
 import re
 
+import tkinter as tk
+
 from classes import MyCookieJar
 from variables import GSPORT_VERSION, HOST, logged_in, frames
 
+from GUI.MainPage import MainPage
 
-def sendToken(session, username, token, response, csrftoken):
+
+def sendToken(session, username, token, response, csrftoken, frameManager):
 
     first_try = True
     while re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text) is not None or first_try:
@@ -25,3 +29,5 @@ def sendToken(session, username, token, response, csrftoken):
     session.cookies.save(ignore_discard=True)
 
     print("[login] Done.")
+
+    frameManager.show_frame(MainPage)
