@@ -1,150 +1,128 @@
-import getopt
+import argparse
 import os
 
-from helpers import usage
-from variables import GSPORT_VERSION
-
-
-def version():
-    print(GSPORT_VERSION)
-
+from variables import HOST_URL, GSPORT_VERSION, LIST_EXAMPLE_MESSAGE, DOWNLOAD_EXAMPLE_MESSAGE, DOWNLOAD_ALL_EXAMPLE_MESSAGE
+from helpers import print
 
 class Options:
     def __init__(self, argv):
-        self.download = None
-        self.download_all = False
-        self.force = False
-        self.host = "https://portal.genomescan.nl/"
-        self.listing = False
-        self.listingSize = False
-        self.ignore = False
-        self.help = False
-        self.project = None
-        self.no_options = True
-        self.found_project = False
-        self.clear_cookies = False
+        # Create the parser for gsport.
+        parser = argparse.ArgumentParser(prog='gsport',
+                                         description='GSPORT command-line tool for accessing GenomeScans new Customer Portal',
+                                         epilog='For the new customer portal only.')
+        subparsers = parser.add_subparsers(title='subcommands',
+                                           description='valid subcommands',
+                                           help='use subcommand with -h for additional help', dest="subparser_name")
+
+        # Parser commands.
+        parser.add_argument("-H", "--host", default=HOST_URL, help=f"The host site default is %(default)s")
+        parser.add_argument("-c", "--clear-cookies", action="store_true", help="clear cookies and logout session")
+        parser.add_argument("-v", "--version", help="show the software version and exit", action="version",
+                            version=f'%(prog)s {GSPORT_VERSION}')
+        parser.add_argument("-p", "--projects", help="show all the projects that a user has access to",
+                            action="store_true")
+
+        # List of shared commands for subcommands.
+        project_parser = argparse.ArgumentParser(add_help=False)
+        project_parser.add_argument("PROJECT",
+                                    help="[projectcode] for specific projects")
+        download_and_listing_shared = argparse.ArgumentParser(add_help=False)
+        download_and_listing_shared.add_argument("-d", "--cd", default=".",
+                                                 help="files (or directories) in dir, dirs can be appended with forward"
+                                                      " slashes: / (eg. 'Analysis/Sample 1', with quotes) or Analysis/s1/bam"
+                                                      " (without spaces, no quotes needed)")
+        downloads_shared = argparse.ArgumentParser(add_help=False)
+        downloads_shared.add_argument("-o", "--output", default=".", help="directory that downloaded files will go in, default is current directory")
+
+        # List subcommand.
+        subparser_list = subparsers.add_parser('list'
+                                               , formatter_class=argparse.RawDescriptionHelpFormatter,
+                                               help='prints the output',
+                                               description="this subcommand prints the output",
+                                               epilog=LIST_EXAMPLE_MESSAGE,
+                                               parents=[project_parser, download_and_listing_shared])
+        list_options_group = subparser_list.add_mutually_exclusive_group()
+        list_options_group.add_argument("-m", "--dirs", action="store_true", help="show directories")
+        list_options_group.add_argument("-r", "--recursive", action="store_true",
+                                        help="recursive complete tree from --cd "
+                                             "[dir] or everything if no --cd option is given ")
+        subparser_list.set_defaults(func=self.L)
+
+        # Download subcommand.
+        subparser_download = subparsers.add_parser('download', help='download specified files',
+                                                   description="this allows the download of individual files, use the full path for files",
+                                                   epilog=DOWNLOAD_EXAMPLE_MESSAGE,
+                                                   parents=[project_parser, downloads_shared]
+                                                   )
+        subparser_download.add_argument("FILE", help="files to download seperated by spaces", nargs="+")
+        subparser_download.set_defaults(func=self.D)
+
+        # Download all subcommand.
+        subparser_download_all = subparsers.add_parser('all', formatter_class=argparse.RawDescriptionHelpFormatter,
+                                                       help='download all files',
+                                                       description="this subcommand allows the download of all files",
+                                                       epilog=DOWNLOAD_ALL_EXAMPLE_MESSAGE,
+                                                       parents=[project_parser, download_and_listing_shared, downloads_shared])
+        subparser_download_all.add_argument("-t", "--threads", type=int, default=os.cpu_count())
+        subparser_download_all.add_argument("-r", "--recursive", action="store_true",
+                                            help="recursive complete tree from --cd "
+                                                 "[dir] or everything if no --cd option is given ")
+        subparser_download_all.set_defaults(func=self.A)
+
+        # Parse arguments.
+        args = parser.parse_args()
+
+        self.host: str = args.host  # The host site that gsport should make connection to.
+        self.download: list | None = None  # When the download option is being used the files are saved in a list.
+        self.download_all: bool = False  # Is the all option being used.
+        self.listing: bool = False  # Is the list option being used.
+        self.recursive: bool = False  # Is the recursive option being used.
+        self.project: str | None = None  # The projectcode that the user requests things from.
+        self.clear_cookies: bool = args.clear_cookies  # Clear the cookies, must be logged in to clear cookies.
+        self.threads: int = 1  # The amount of threads being used for multithreading, Linux only.
+        self.folder_mode: bool = False  # Show only directories in list sub-command.
+        self.dir: str = "."
+        self.get_projects: bool = args.projects  # Show all user projects?
+        self.output: str = "."  # The directory that the files are being saved to.
+
+        if args.host != parser.get_default("host"):
+            print.print_info(f"Using alternative host {args.host}")
+
+        if args.subparser_name is not None:
+            args.func(args)
+
+    def L(self, args):
+        """
+            Gets called when the subcommand L is used.
+        :param args: The argument Namespace object.
+        :return: None
+        """
+        self.folder_mode = args.dirs
+        self.dir = args.cd + "/"
+        self.recursive = args.recursive
+        self.project = args.PROJECT
+        self.listing = True
+
+    def A(self, args):
+        """
+            Gets called when the subcommand A is used.
+        :param args: The argument Namespace object.
+        :return: None
+        """
+        self.dir = args.cd + "/"
+        self.recursive = args.recursive
+        self.threads = args.threads
+        self.project = args.PROJECT
+        self.download_all = True
+        self.output = args.output
+
+    def D(self, args):
+        """
+            Gets called when the subcommand D is used.
+        :param args: The argument Namespace object.
+        :return: None
+        """
+        self.download = args.FILE
+        self.project = args.PROJECT
         self.threads = os.cpu_count()
-        self.dirs = False
-        self.dir = ""
-        self.recursive = False
-        self.includeFile = None
-        self.excludeFile = None
-        self.checksumFile = None
-        self.path = None
-
-        try:
-            opts, args = getopt.getopt(
-                argv[1:],
-                "H:p:lsd:afchrivt:I:E:C:P:",
-                [
-                    "host=",
-                    "project=",
-                    "list",
-                    "size",
-                    "download=",
-                    "download-all",
-                    "force",
-                    "threads",
-                    "version",
-                    "clear-cookies",
-                    "help",
-                    "dirs",
-                    "cd=",
-                    "recursive",
-                    "ignore",
-                    "includeFile=",
-                    "excludeFile=",
-                    "checksumFile=",
-                    "path=",
-                ],
-            )
-
-        except getopt.GetoptError as err:
-            print(err)
-            usage()
-            exit(1)
-
-        for o, a in opts:
-            if o in ("-h", "--help"):
-                usage()
-                exit()
-            elif o in ("-H", "--host"):
-                self.host = a.strip()
-            elif o in ("-p", "--project"):
-                self.project = a.strip()
-                self.found_project = True
-            elif o in ("-l", "--list"):
-                self.listing = True
-                self.no_options = False
-            elif o in ("-s", "--size"):
-                self.listing = True
-                self.listingSize = True
-                self.no_options = False
-            elif o in ("-d", "--download"):
-                self.download = a.strip()
-                self.no_options = False
-            elif o in ("-t", "--threads"):
-                self.threads = a.strip()
-            elif o in ("-a", "--download-all"):
-                self.download_all = True
-                self.no_options = False
-            elif o in ("-f", "--force"):
-                self.force = True
-            elif o in ("-i", "--ignore"):
-                self.ignore = True
-            elif o in ("-c", "--clear-cookies"):
-                self.clear_cookies = True
-                self.no_options = False
-            elif o in ("-I", "--includeFile"):
-                if os.path.isfile(a.strip()):
-                    self.includeFile = a.strip()
-                    print("Include file: " + self.includeFile)
-                else:
-                    print("File for -I parameter does not exist: " + a.strip())
-                    exit()
-            elif o in ("-E", "--excludeFile"):
-                if os.path.isfile(a.strip()):
-                    self.excludeFile = a.strip()
-                    print("Exclude file: " + self.excludeFile)
-                else:
-                    print("File for -E parameter does not exist: " + a.strip())
-                    exit()
-            elif o in ("-C", "--checksumFile"):
-                if not os.path.isfile(a.strip()):
-                    # Create a new file.
-                    open(a.strip(), "x")
-                    print("Local checksum file did not exist. New file created.")
-                self.checksumFile = a.strip()
-                print("Local checksum file: " + self.checksumFile)
-
-            elif o in ("-P", "--path"):
-                if os.path.isdir(a.strip()):
-                    self.path = a.strip()
-                else:
-                    print(a.strip() + " is not a folder.")
-            elif o in ("--dirs",):
-                self.dirs = True
-            elif o in ("--cd",):
-                self.dir = a.strip() + "/"
-            elif o in ("-r", "--recursive"):
-                self.recursive = True
-            elif o in ("-v", "--version"):
-                version()
-                exit()
-            else:
-                assert False
-
-        if (self.listing or self.download or self.download_all) and not self.found_project:
-            print("[error] listing, list size, download and download all require a project")
-            usage()
-            exit(1)
-        if self.found_project and self.no_options:
-            print("[error] project with no other option, what do you want to do?")
-            usage()
-            exit(1)
-        if self.download is not None and self.download_all:
-            print("[error] cannot download one file and all files (option -d and -a)")
-            usage()
-            exit(1)
-        if not self.download_all:
-            self.threads = 1
+        self.output = args.output

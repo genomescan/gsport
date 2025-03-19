@@ -3,3 +3,4 @@ chardet==3.0.4
 idna==2.8
 requests==2.28.2
 urllib3==1.26.5
+terminalcolorpy~=1.0.0

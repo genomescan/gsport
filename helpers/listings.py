@@ -3,59 +3,55 @@ import os
 
 import requests
 
-from .print_rec import print_rec
-from .sizeofmetric import sizeofmetric_fmt
+from helpers import print_rec, print_error, print_info
+from variables import PROJECT_DATA_API
 
+from terminalcolorpy import colored
 
-def get_listing(session):
+def get_listing(session) -> None:
+    """
+        Gets the json in the form {data: [{name:str, size: str, children: list[dict]}]}
+        and prints the values in a certain way depending on it being default, -m or -r.
+    :param session: Session object.
+    :return: None
+    """
+    response = requests.get(session.options.host + PROJECT_DATA_API + session.options.project,
+                            params={"dirs": session.options.dir},
+                            cookies=session.cookies, verify=False)
+    try:
+        datafiles = json.loads(response.text)
+    except json.decoder.JSONDecodeError:
+        print_error(f"[get_listing] Error reading response: {response.text}")
+        exit(1)
     if session.options.recursive:
-        response = requests.get(
-            session.options.host + "/data_api_recursive/" + session.options.project,
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-        try:
-            datafiles = json.loads(response.text)
-            print_rec(datafiles["children"], 0)
-        except json.decoder.JSONDecodeError:
-            print("[get_listing] Error reading response:", response.text)
-            exit(1)
+        print_rec(datafiles["data"], 0)
     else:
-        response = requests.get(
-            session.options.host
-            + "/data_api2/"
-            + session.options.project
-            + ("/y" if session.options.dirs is True else "/n"),
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-        try:
-            datafiles = json.loads(response.text)
-            for file in datafiles:
-                if session.options.listingSize:
-                    print(file["name"] + "   (" + sizeofmetric_fmt(file["size"]) + ")")
-                else:
-                    print(file["name"])
-        except json.decoder.JSONDecodeError:
-            print("[get_listing] Error reading response:", response.text)
+        if not session.options.folder_mode:
+            for file in datafiles["data"]:
+                if len(file["children"]) == 0:
+                    print(colored(text=file["name"], color="yellow"), 'Size: ',
+                          colored(text=file["size"], color="red"))
+        else:
+            for file in datafiles["data"]:
+                if len(file["children"]) > 0:
+                    print(colored(text=file["name"], color="cyan"))
+
+
+def list_all_projects(session) -> None:
+    """
+        Prints all the projects a user has access to.
+    :param session: Session object.
+    :return:
+    """
+    print_info("[requesting projects]")
+    response = requests.get(session.options.host + ALL_PROJECTS_API,
+                            cookies=session.cookies, verify=False)
+    try:
+        projects = response.json()
+        for i in projects["response"]:
+            print(i)
+        if response.status_code != 200:
             exit(1)
-
-
-def get_list(res, session_dir):
-    flist = []
-
-    def print_list(dic, path):
-        for item in dic:
-            if item["type"] == "directory":
-                d = os.path.join(path, item["name"])
-                if not os.path.isdir(d):
-                    try:
-                        os.makedirs(d)
-                    except FileExistsError:
-                        pass  # this can be the case with multithreading
-                print_list(item["children"], d)
-            else:
-                flist.append({"name": path + "/" + item["name"], "size": item["size"]})
-
-    print_list(json.loads(res)["children"], session_dir)
-    return flist
+    except (json.decoder.JSONDecodeError, KeyError):
+        print_error(f"[get_listing] Error reading response: {response.text}")
+        exit(1)
