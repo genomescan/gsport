@@ -74,7 +74,7 @@ class LoginPage(tk.Frame):
         label = tk.Label(topFrame, text="Password", font=textFont)
         label.pack(pady=(20, 0), anchor='w')
 
-        pwdtxt = ttk.Entry(topFrame, width=27,font=textFont)
+        pwdtxt = ttk.Entry(topFrame, show="*", width=27,font=textFont)
         pwdtxt.pack(anchor='w')
 
         login_button = ttk.Button(self, text="Login", command=Login)

@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from pathlib import Path
 
+from GUI.ProgressPage import ProgressPage
 from GUI.LoadingPage import LoadingPage
 from GUI.ProjectPage import ProjectPage
 from GUI.login import LoginPage
@@ -22,15 +23,12 @@ class SeaofBTCapp(tk.Tk):
         container = tk.Frame(self)
         self.frames = {}
 
-        cookies.cookies = MyCookieJar(filename=os.path.join(str(Path.home()), ".gs_cookies.txt"))
-        print(cookies.cookies)
-
         container.pack(side="top", fill="both", expand=True)
 
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        for F in (LoginPage, LoadingPage, MainPage, ProjectPage):
+        for F in (LoginPage, LoadingPage, MainPage, ProjectPage, ProgressPage):
             frame = F(container, self)
 
             self.frames[F] = frame
@@ -66,7 +64,9 @@ class SeaofBTCapp(tk.Tk):
                 print("[session] No cookies found. Logging in...")
                 self.after(2000, self.show_frame, LoginPage)
 
-# Initialize the application
-app = SeaofBTCapp()
-app.geometry("700x500")  # Specify window size
-app.mainloop()
+
+if __name__ == '__main__':
+    # Initialize the application
+    app = SeaofBTCapp()
+    app.geometry("700x500")  # Specify window size
+    app.mainloop()

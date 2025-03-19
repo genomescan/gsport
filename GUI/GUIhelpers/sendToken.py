@@ -5,6 +5,7 @@ import re
 
 import tkinter as tk
 
+import cookies
 from classes import MyCookieJar
 from variables import GSPORT_VERSION, HOST, logged_in, frames
 
@@ -27,6 +28,10 @@ def sendToken(session, username, token, response, csrftoken, frameManager):
 
     print("[login] Success, saving cookies...")
     session.cookies.save(ignore_discard=True)
+
+    cookies.cookies = session.cookies
+    print("New cookies :")
+    print(cookies.cookies)
 
     print("[login] Done.")
 
