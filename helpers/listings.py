@@ -3,8 +3,9 @@ import os
 
 import requests
 
-from helpers import print_rec, print_error, print_info
-from variables import PROJECT_DATA_API
+from .print import print_rec, print_error, print_info
+
+from variables import PROJECT_DATA_API, ALL_PROJECTS_API
 
 from terminalcolorpy import colored
 
@@ -15,24 +16,26 @@ def get_listing(session) -> None:
     :param session: Session object.
     :return: None
     """
-    response = requests.get(session.options.host + PROJECT_DATA_API + session.options.project,
-                            params={"dirs": session.options.dir},
-                            cookies=session.cookies, verify=False)
+    response = requests.get(session.options.host + '/data_api_recursive/' +
+                            session.options.project,
+                            cookies=session.cookies,
+                            params={"cd": session.options.dir})
+
     try:
         datafiles = json.loads(response.text)
     except json.decoder.JSONDecodeError:
         print_error(f"[get_listing] Error reading response: {response.text}")
         exit(1)
     if session.options.recursive:
-        print_rec(datafiles["data"], 0)
+        print_rec(datafiles["children"], 0)
     else:
         if not session.options.folder_mode:
-            for file in datafiles["data"]:
+            for file in datafiles["children"]:
                 if len(file["children"]) == 0:
                     print(colored(text=file["name"], color="yellow"), 'Size: ',
                           colored(text=file["size"], color="red"))
         else:
-            for file in datafiles["data"]:
+            for file in datafiles["children"]:
                 if len(file["children"]) > 0:
                     print(colored(text=file["name"], color="cyan"))
 

@@ -1,12 +1,12 @@
 GSPORT_VERSION = "2.0"
 
 ALL_PROJECTS_API = "api/projects-all"
-LOGIN_URL = "api/login"
-LOGGED_IN_URL = "api/logged-in"
-TWO_FACTOR_AUTH_URL = "api/two-factor"
-PROJECT_DATA_API = 'api/project/'
+LOGIN_URL = "/login/"
+LOGGED_IN_URL = "/logged_in_api/"
+TWO_FACTOR_AUTH_URL = "/otp_ok/"
+PROJECT_DATA_API = '/data_api_recursive/'
 LOGOUT_URL = 'api/logout'
-HOST_URL = "http://127.0.0.1:8000/"
+HOST_URL = "https://portal.genomescan.nl/"
 VERIFY_FILES_URL = "api/download/verify/"
 DOWNLOAD_FILE_URL = "api/download/"
 

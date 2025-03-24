@@ -20,7 +20,7 @@ def print_rec(dic, depth: int) -> None:
     :return: None
     """
     for item in dic:
-        if len(item["children"]) != 0:
+        if item['type'] == "directory":
             for i in range(depth * 2):
                 print("  ", end='')
             print("└──", colored(text=item["name"], color="cyan"))
@@ -29,4 +29,4 @@ def print_rec(dic, depth: int) -> None:
             for i in range(depth * 2):
                 print("  ", end='')
             print("├──", colored(text=item["name"], color="yellow"), 'Size: ',
-                  colored(text=item["size"], color="red"))
+                  colored(text=str(item["size"]), color="red"))

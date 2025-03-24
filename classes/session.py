@@ -12,13 +12,14 @@ import requests
 
 from variables import LOGGED_IN_URL, LOGIN_URL, TWO_FACTOR_AUTH_URL, LOGOUT_URL
 
-from helpers import print_error, print_warning, print_info
+from helpers.print import print_error, print_warning, print_info
 
-from helpers import human_readable_eta, size_of_metric_fmt
-from variables import GSPORT_VERSION
+from helpers.eta_readable import human_readable_eta
+from helpers.sizeofmetric import size_of_metric_fmt
 
-from .MyCookie import MyCookieJar
+from variables import GSPORT_VERSION, HOST_URL
 
+from classes import MyCookieJar
 
 class Session:
     def __init__(self, options):
@@ -31,7 +32,7 @@ class Session:
             self.logout()
         try:
             self.cookies.load()
-            if requests.get(self.options.host + LOGGED_IN_URL, cookies=self.cookies, verify=False).status_code == 200:
+            if requests.get(HOST_URL + LOGGED_IN_URL, cookies=self.cookies).status_code == 200:
                 print_info("[session] cookies found.")
             else:
                 self.login()
@@ -53,7 +54,7 @@ class Session:
             os.path.join(str(Path.home()), '.gs_cookies.txt'))  # set the cookie.
         print_info("[login] Get login page")
         # Perform a GET request to obtain the CSRF token
-        response = session.get(self.options.host + LOGIN_URL, verify=False)
+        response = session.get(HOST_URL + LOGIN_URL)
         csrftoken = response.cookies['csrftoken']
         success = False
         while not success:
@@ -61,8 +62,9 @@ class Session:
             psw = getpass()
             login_data = dict(username=username, password=psw, csrfmiddlewaretoken=csrftoken,
                               next='/')
-            response = session.post(self.options.host + LOGIN_URL, data=login_data, verify=False
-                                    )  # try to log in.
+            response = session.post(self.options.host + "/login/", data=login_data,
+                                    headers=dict(Referer=self.options.host + "/login/"))
+            # try to log in.
             if response.status_code != 200:
                 print_warning(response.text)
                 continue

@@ -2,7 +2,6 @@ import argparse
 import os
 
 from variables import HOST_URL, GSPORT_VERSION, LIST_EXAMPLE_MESSAGE, DOWNLOAD_EXAMPLE_MESSAGE, DOWNLOAD_ALL_EXAMPLE_MESSAGE
-from helpers import print
 
 class Options:
     def __init__(self, argv):
