@@ -7,6 +7,7 @@ import requests
 
 from multiprocessing import Process
 
+from .listings import get_list
 from .print import print_warning, print_error
 from .sizeofmetric import size_of_metric_fmt
 from .eta_readable import human_readable_eta
@@ -23,29 +24,33 @@ def download(session) -> None:
     :param session: The session object.
     :return: None
     """
+    datafiles = ""
     if session.options.download:
-        response = requests.get(session.options.host + VERIFY_FILES_URL + session.options.project,
-                                cookies=session.cookies,
-                                params={"file_list": json.dumps(session.options.download)}, verify=False)
+        response = requests.get(
+            session.options.host + "/data_api2/" + session.options.project + "/n",
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
+        datafiles = response.json()
+        print(response.text)
+        datafiles = datafiles["children"]
     elif session.options.download_all and session.options.recursive:
-        response = requests.get(session.options.host + VERIFY_FILES_URL + session.options.project + "/recursive",
-                                params={"dirs": session.options.dir},
-                                cookies=session.cookies, verify=False)
+        response = requests.get(session.options.host + '/data_api_recursive/' +
+                                session.options.project,
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
+        datafiles = get_list(response.text, session.options.dir)
     elif session.options.download_all:
-        response = requests.get(session.options.host + VERIFY_FILES_URL + session.options.project + "/dirs",
-                                params={"dirs": session.options.dir},
-                                cookies=session.cookies, verify=False)
+        response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
+                                cookies=session.cookies,
+                                params={"cd": session.options.dir})
+        datafiles = response.json()
+
     else:
         exit(1)
+
     if response.status_code != 200:
         print_error(response.text)
-        exit(1)
-    try:
-        datafiles = response.json()
-        datafiles = datafiles["data"]
-        print(datafiles, "\n")
-    except (json.decoder.JSONDecodeError, KeyError) as e:
-        printcolor({"text": f"[download] [verification] Error reading response: {e}", "color": "red"})
         exit(1)
 
     if session.options.download:

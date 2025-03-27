@@ -1,3 +1,5 @@
+import requests
+
 from variables import DOWNLOAD_FILE_URL
 from .parallel_download import download_parallel_linux
 import os
@@ -16,8 +18,14 @@ def get_url(session, datafiles: list[dict[str, str | int]]) -> None:
     for file in datafiles:
         fsize = file['size'] if file['size'] != 0 else 1
         fname = os.path.join(session.options.output, file['name'].replace("\\", "/").split("/")[-1]) if not session.options.recursive else os.path.join(session.options.output, os.path.normpath(file["name"]))
+        filename = "/" + (session.options.dir if not session.options.recursive else "") + "/" + file["name"]
         dl_sum += fsize
-        url = (session.options.host + DOWNLOAD_FILE_URL + session.options.project, {"file": file['name']})
+        response = requests.get(
+            session.options.host + "/gen_session_file/",
+            cookies=session.cookies,
+            params={"project": session.options.project, "filename": filename},
+        )
+        url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
         print(url)
         dl_list.append([url, fsize, fname])
 

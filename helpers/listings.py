@@ -26,18 +26,23 @@ def get_listing(session) -> None:
     except json.decoder.JSONDecodeError:
         print_error(f"[get_listing] Error reading response: {response.text}")
         exit(1)
+
     if session.options.recursive:
+
         print_rec(datafiles["children"], 0)
     else:
         if not session.options.folder_mode:
             for file in datafiles["children"]:
-                if len(file["children"]) == 0:
+                if file['type'] == "file":
                     print(colored(text=file["name"], color="yellow"), 'Size: ',
-                          colored(text=file["size"], color="red"))
+                          colored(text=str(file["size"]), color="red"))
         else:
             for file in datafiles["children"]:
-                if len(file["children"]) > 0:
-                    print(colored(text=file["name"], color="cyan"))
+                if len(file["name"]) > 0:
+                    if file["type"] == "directory":
+                        print(colored(text=file["name"], color="cyan"))
+                    else:
+                        print(colored(text=file["name"], color="yellow"))
 
 
 def list_all_projects(session) -> None:
@@ -58,3 +63,22 @@ def list_all_projects(session) -> None:
     except (json.decoder.JSONDecodeError, KeyError):
         print_error(f"[get_listing] Error reading response: {response.text}")
         exit(1)
+
+def get_list(res, session_dir):
+    flist = []
+
+    def print_list(dic, path):
+        for item in dic:
+            if item["type"] == "directory":
+                d = os.path.join(path, item["name"])
+                if not os.path.isdir(d):
+                    try:
+                        os.makedirs(d)
+                    except FileExistsError:
+                        pass  # this can be the case with multithreading
+                print_list(item["children"], d)
+            else:
+                flist.append({"name": path + "/" + item["name"], "size": item["size"]})
+
+    print_list(json.loads(res)["children"], session_dir)
+    return flist

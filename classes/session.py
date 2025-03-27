@@ -85,7 +85,7 @@ class Session:
         print_info("[login] Done.")
         self.cookies = session.cookies
 
-    def download_file(self, url: tuple[str, dict], fsize: int, fname: str) -> None:
+    def download_file(self, url: str, fsize: int, fname: str) -> None:
         """
             Download the file by streaming the dat from the url.
         :param url: The download link.
@@ -96,8 +96,8 @@ class Session:
         try:
             dsize = 0
             start = time.time()
-            with requests.get(url[0], stream=True, cookies=self.cookies, verify=False,
-                              params=url[1]) as r:  # Start the download.
+
+            with requests.get(url, stream=True, cookies=self.cookies) as r: # Start the download.
                 self.options.dir = '/'.join(self.options.dir.split('/')[:-1])
 
                 if self.options.dir == '':
@@ -125,7 +125,7 @@ class Session:
     def logout(self) -> None:
         try:
             self.cookies.load()
-            response = requests.get(self.options.host + LOGOUT_URL, cookies=self.cookies, verify=False)
+            response = requests.get(self.options.host + LOGOUT_URL, cookies=self.cookies)
             if response.status_code == 200:
                 print_info("[logout] Logged out.")
             else:
