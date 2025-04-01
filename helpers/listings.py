@@ -28,7 +28,6 @@ def get_listing(session) -> None:
         exit(1)
 
     if session.options.recursive:
-
         print_rec(datafiles["children"], 0)
     else:
         if not session.options.folder_mode:

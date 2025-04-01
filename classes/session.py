@@ -32,7 +32,8 @@ class Session:
             self.logout()
         try:
             self.cookies.load()
-            if json.loads(requests.get(options.host + '/logged_in_api/', cookies=self.cookies).text)['logged_in']:
+            response = requests.get(options.host + '/logged_in_api/', cookies=self.cookies).text
+            if json.loads(response)['logged_in']:
                 print_info("[session] cookies found.")
             else:
                 self.login()
