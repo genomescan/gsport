@@ -2,7 +2,7 @@ from multiprocessing import Process
 import time
 from helpers.sizeofmetric import size_of_metric_fmt
 from helpers.eta_readable import human_readable_eta
-from helpers.print import print_info
+from helpers.print_functions import print_info
 
 def download_parallel_linux(session, dl_list: list[list], dl_sum: int) -> None:
     """

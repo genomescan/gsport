@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from .print import print_rec, print_error, print_info
+from .print_functions import print_rec, print_error, print_info
 
 from variables import PROJECT_DATA_API, ALL_PROJECTS_API
 

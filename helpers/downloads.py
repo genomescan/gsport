@@ -8,7 +8,7 @@ import requests
 from multiprocessing import Process
 
 from .listings import get_list
-from .print import print_warning, print_error
+from .print_functions import print_warning, print_error
 from .sizeofmetric import size_of_metric_fmt
 from .eta_readable import human_readable_eta
 

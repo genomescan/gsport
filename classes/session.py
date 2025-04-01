@@ -12,7 +12,7 @@ import requests
 
 from variables import LOGGED_IN_URL, LOGIN_URL, TWO_FACTOR_AUTH_URL, LOGOUT_URL
 
-from helpers.print import print_error, print_warning, print_info
+from helpers.print_functions import print_error, print_warning, print_info
 
 from helpers.eta_readable import human_readable_eta
 from helpers.sizeofmetric import size_of_metric_fmt

@@ -1,6 +1,7 @@
 import argparse
 import os
 
+from helpers import print_functions
 from variables import HOST_URL, GSPORT_VERSION, LIST_EXAMPLE_MESSAGE, DOWNLOAD_EXAMPLE_MESSAGE, DOWNLOAD_ALL_EXAMPLE_MESSAGE
 
 class Options:
@@ -85,7 +86,7 @@ class Options:
         self.output: str = "."  # The directory that the files are being saved to.
 
         if args.host != parser.get_default("host"):
-            print.print_info(f"Using alternative host {args.host}")
+            print_functions.print_info(f"Using alternative host {args.host}")
 
         if args.subparser_name is not None:
             args.func(args)
