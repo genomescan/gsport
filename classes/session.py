@@ -32,7 +32,7 @@ class Session:
             self.logout()
         try:
             self.cookies.load()
-            if requests.get(HOST_URL + LOGGED_IN_URL, cookies=self.cookies).status_code == 200:
+            if json.loads(requests.get(options.host + '/logged_in_api/', cookies=self.cookies).text)['logged_in']:
                 print_info("[session] cookies found.")
             else:
                 self.login()
