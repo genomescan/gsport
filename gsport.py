@@ -14,13 +14,13 @@ import json
 import os
 import platform
 import re
-import requests
 import sys
 import time
-
 from getpass import getpass
 from multiprocessing import Process, Queue
 from pathlib import Path
+
+import requests
 
 GSPORT_VERSION = "1.8.0"
 
@@ -30,7 +30,8 @@ def version():
 
 
 def usage():
-    print("""
+    print(
+        """
 Usage: gsport [options]
 GSPORT command-line tool for accessing GenomeScan Customer Portal
 
@@ -41,14 +42,14 @@ Options
 -s --size return a list with the size
 -d --download [filename]
 -a --download-all download all files from project -p or --project
--f --force downloading files even if they already exist 
+-f --force downloading files even if they already exist
 -c --clear-cookies clear session/cookies
 -t --workers [n] allow n concurrent workers (defaults to number of logical cpu cores) (works only on Linux)
 --dirs show directories instead of files (combined with -l or --list)
---cd [dir] show files (or directories) in dir, 
+--cd [dir] show files (or directories) in dir,
      dirs can be appended with forward slashes: / (eg. "Analysis/Sample 1", with quotes)
      or Analysis/s1/bam (without spaces, no quotes needed)
--r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given 
+-r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given
 -h --help prints this help
 -v --version show gsport version
 -i --ignore Ignore MD5 checksum result and download only files not on the system
@@ -73,7 +74,8 @@ Example usage: gsport -p 100000 -l shows all the files under that project
                gsport -p 100000 -a -E "C:\\project\\exclude.txt"
                gsport -p 100000 -a -C "C:\\project\\localChecksums.md5"
                gsport -p 100000 -a -P "C:\\project\\exclude.txt"
-""")
+"""
+    )
 
 
 def human_readable_eta(seconds):
@@ -81,19 +83,19 @@ def human_readable_eta(seconds):
     hours = seconds // 3600 % 24
     minutes = seconds // 60 % 60
     seconds = seconds % 60
-    ret = str(round(days)) + 'd' if days > 0 else ''
-    ret += str(round(hours)) + 'h' if hours > 0 else ''
-    ret += str(round(minutes)) + 'm' if minutes > 0 else ''
-    ret += str(round(seconds)) + 's' if seconds > 0 and minutes < 1 else ''
+    ret = str(round(days)) + "d" if days > 0 else ""
+    ret += str(round(hours)) + "h" if hours > 0 else ""
+    ret += str(round(minutes)) + "m" if minutes > 0 else ""
+    ret += str(round(seconds)) + "s" if seconds > 0 and minutes < 1 else ""
     return ret
 
 
-def sizeofmetric_fmt(num, suffix='B'):
-    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+def sizeofmetric_fmt(num, suffix="B"):
+    for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if abs(num) < 1000.0:
             return "%3.1f %s%s" % (num, unit, suffix)
         num /= 1000.0
-    return "%.1f %s%s" % (num, 'Y', suffix)
+    return "%.1f %s%s" % (num, "Y", suffix)
 
 
 class Options:
@@ -112,7 +114,7 @@ class Options:
         self.clear_cookies = False
         self.threads = os.cpu_count()
         self.dirs = False
-        self.dir = '.'
+        self.dir = "."
         self.recursive = False
         self.includeFile = None
         self.excludeFile = None
@@ -120,12 +122,31 @@ class Options:
         self.path = None
 
         try:
-            opts, args = getopt.getopt(argv[1:],
-                                       "H:p:lsd:afchrivt:I:E:C:P:",
-                                       ["host=", "project=", "list", "size",
-                                        "download=", "download-all", "force", "threads", "version",
-                                        "clear-cookies", "help", "dirs", "cd=", "recursive", "ignore",
-                                        "includeFile=", "excludeFile=", "checksumFile=", "path="])
+            opts, args = getopt.getopt(
+                argv[1:],
+                "H:p:lsd:afchrivt:I:E:C:P:",
+                [
+                    "host=",
+                    "project=",
+                    "list",
+                    "size",
+                    "download=",
+                    "download-all",
+                    "force",
+                    "threads",
+                    "version",
+                    "clear-cookies",
+                    "help",
+                    "dirs",
+                    "cd=",
+                    "recursive",
+                    "ignore",
+                    "includeFile=",
+                    "excludeFile=",
+                    "checksumFile=",
+                    "path=",
+                ],
+            )
 
         except getopt.GetoptError as err:
             print(err)
@@ -166,30 +187,30 @@ class Options:
             elif o in ("-I", "--includeFile"):
                 if os.path.isfile(a.strip()):
                     self.includeFile = a.strip()
-                    print('Include file: ' + self.includeFile)
+                    print("Include file: " + self.includeFile)
                 else:
-                    print('File for -I parameter does not exist: ' + a.strip())
+                    print("File for -I parameter does not exist: " + a.strip())
                     exit()
             elif o in ("-E", "--excludeFile"):
                 if os.path.isfile(a.strip()):
                     self.excludeFile = a.strip()
-                    print('Exclude file: ' + self.excludeFile)
+                    print("Exclude file: " + self.excludeFile)
                 else:
-                    print('File for -E parameter does not exist: ' + a.strip())
+                    print("File for -E parameter doesn't exist: " + a.strip())
                     exit()
             elif o in ("-C", "--checksumFile"):
                 if not os.path.isfile(a.strip()):
                     # Create a new file.
                     open(a.strip(), "x")
-                    print('Local checksum file did not exist. New file created.')
+                    print("Local checksum file did not exist. New file created.")
                 self.checksumFile = a.strip()
-                print('Local checksum file: ' + self.checksumFile)
+                print("Local checksum file: " + self.checksumFile)
 
             elif o in ("-P", "--path"):
                 if os.path.isdir(a.strip()):
                     self.path = a.strip()
                 else:
-                    print(a.strip() + ' is not a folder.')
+                    print(a.strip() + " is not a folder.")
             elif o in ("--dirs",):
                 self.dirs = True
             elif o in ("--cd",):
@@ -202,8 +223,12 @@ class Options:
             else:
                 assert False
 
-        if (self.listing or self.download or self.download_all) and not self.found_project:
-            print("[error] listing, list size, download and download all require a project")
+        if (
+            self.listing or self.download or self.download_all
+        ) and not self.found_project:
+            print(
+                "[error] listing, list size, download and download all require a project"
+            )
             usage()
             exit(1)
         if self.found_project and self.no_options:
@@ -223,7 +248,9 @@ class Session:
         self.options = options
         self.md5List = []
         self.localMd5List = []
-        self.cookies = http.cookiejar.MozillaCookieJar(filename=os.path.join(str(Path.home()), '.gs_cookies.txt'))
+        self.cookies = http.cookiejar.MozillaCookieJar(
+            filename=os.path.join(str(Path.home()), ".gs_cookies.txt")
+        )
         self.logged_in = False
         self.queue = Queue()
         self.process = Queue()
@@ -235,7 +262,11 @@ class Session:
 
         try:
             self.cookies.load()
-            if json.loads(requests.get(options.host + '/logged_in_api/', cookies=self.cookies).text)['logged_in']:
+            if json.loads(
+                requests.get(
+                    options.host + "/logged_in_api/", cookies=self.cookies
+                ).text
+            )["logged_in"]:
                 self.logged_in = True
             else:
                 self.login()
@@ -245,47 +276,77 @@ class Session:
 
     def readFiles(self, options):
         if options.includeFile and os.path.exists(options.includeFile):
-            self.includeFiles = open(options.includeFile, 'r').read().split('\n')
+            self.includeFiles = open(options.includeFile, "r").read().split("\n")
 
         if options.excludeFile and os.path.exists(options.excludeFile):
-            self.excludeFiles = open(options.excludeFile, 'r').read().split('\n')
+            self.excludeFiles = open(options.excludeFile, "r").read().split("\n")
 
         if options.checksumFile and os.path.exists(options.checksumFile):
-            lines = open(options.checksumFile, 'r').read()
-            self.localMd5List.extend([list.split(', ') for list in lines.split("\n") if list.split(', ') != ['']])
+            lines = open(options.checksumFile, "r").read()
+            self.localMd5List.extend(
+                [
+                    list.split(", ")
+                    for list in lines.split("\n")
+                    if list.split(", ") != [""]
+                ]
+            )
 
     def login(self):
         print("[login] Opening session...")
         session = requests.Session()
-        session.cookies = http.cookiejar.MozillaCookieJar(os.path.join(str(Path.home()), '.gs_cookies.txt'))
+        session.cookies = http.cookiejar.MozillaCookieJar(
+            os.path.join(str(Path.home()), ".gs_cookies.txt")
+        )
         print("[login] Get login page")
         response = session.get(self.options.host + "/login/")
-        csrftoken = response.cookies['csrftoken']
+        csrftoken = response.cookies["csrftoken"]
 
-        username = ''
+        username = ""
         first_try = True
         while re.search('name="password"', response.text) is not None or first_try:
             if not first_try:
                 print("[login] Invalid credentials")
             first_try = False
             username = input("Username: ")
-            login_data = dict(username=username, password=getpass("Password: "), csrfmiddlewaretoken=csrftoken,
-                              next='/')
-            response = session.post(self.options.host + "/login/", data=login_data,
-                                    headers=dict(Referer=self.options.host + "/login/"))
+            login_data = dict(
+                username=username,
+                password=getpass("Password: "),
+                csrfmiddlewaretoken=csrftoken,
+                next="/",
+            )
+            response = session.post(
+                self.options.host + "/login/",
+                data=login_data,
+                headers=dict(Referer=self.options.host + "/login/"),
+            )
 
-        csrftoken = re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text).group(1)
+        csrftoken = re.search(
+            'name="csrfmiddlewaretoken" value="(.+)"', response.text
+        ).group(1)
 
         first_try = True
-        while re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text) is not None or first_try:
+        while (
+            re.search('name="csrfmiddlewaretoken" value="(.+)"', response.text)
+            is not None
+            or first_try
+        ):
             if not first_try:
                 print("[login]", "Invalid token")
             first_try = False
-            login_data = dict(token=input("Token: "), username=username, csrfmiddlewaretoken=csrftoken, next='/')
-            response = session.post(self.options.host + "/otp_ok/", data=login_data,
-                                    headers={"Referer": self.options.host + "/login/",
-                                             "User-Agent": "gsport " + GSPORT_VERSION
-                                             })
+            login_data = dict(
+                token=input("Token: "),
+                username=username,
+                csrfmiddlewaretoken=csrftoken,
+                next="/",
+            )
+            response = session.post(
+                self.options.host + "/otp_ok/",
+                data=login_data,
+                headers={
+                    "Referer": self.options.host + "/login/",
+                    "User-Agent": "gsport " + GSPORT_VERSION,
+                },
+            )
 
         print("[login] Success, saving cookies...")
         session.cookies.save(ignore_discard=True)
@@ -299,13 +360,13 @@ class Session:
             dsize = 0
             start = time.time()
             with requests.get(url, stream=True, cookies=self.cookies) as r:
-                self.options.dir = '/'.join(self.options.dir.split('/')[:-1])
+                self.options.dir = "/".join(self.options.dir.split("/")[:-1])
 
-                if self.options.dir != '':
+                if self.options.dir != "":
                     if not os.path.isdir(os.path.join(self.options.dir)):
                         os.makedirs(os.path.join(self.options.dir))
                 else:
-                    self.options.dir = '.'
+                    self.options.dir = "."
 
                 if self.options.path and os.path.isdir(self.options.path):
                     fpath = os.path.join(self.options.path, fname)
@@ -321,28 +382,50 @@ class Session:
 
                 # With force parameter, you will always re-download, even if the file exists and is the same.
                 elif not self.options.force and os.path.exists(fpath):
-                    md5Hash = hashlib.md5(open(fpath, 'rb').read()).hexdigest()
+                    md5Hash = hashlib.md5(open(fpath, "rb").read()).hexdigest()
 
                     # Only skip if the MD5 hash + filename exists in the md5List.
                     if [md5Hash, fname] in self.md5List:
-                        print('File "' + fname + '" already exists and MD5 check is valid. Skipping download...')
-                        return
-                    elif self.options.checksumFile and [md5Hash, fname] in self.localMd5List:
                         print(
-                            'File "' + fname + '" already exists and MD5 check is valid. Skipping download... (validated via local MD5 list).')
+                            'File "'
+                            + fname
+                            + '" already exists and MD5 check is valid. Skipping download...'
+                        )
+                        return
+                    elif (
+                        self.options.checksumFile
+                        and [md5Hash, fname] in self.localMd5List
+                    ):
+                        print(
+                            'File "'
+                            + fname
+                            + '" already exists and MD5 check is valid. Skipping download... (validated via local MD5 list).'
+                        )
                         return
                     else:
-                        print('File "' + fname + '" exists but MD5 does not match. Re-downloading...')
+                        print(
+                            'File "'
+                            + fname
+                            + '" exists but MD5 does not match. Re-downloading...'
+                        )
 
-                if self.includeFiles and not fname in self.includeFiles:
-                    print('File "' + fname + '" is not in the "include" file. Skipping download...')
+                if self.includeFiles and fname not in self.includeFiles:
+                    print(
+                        'File "'
+                        + fname
+                        + '" is not in the "include" file. Skipping download...'
+                    )
                     return
 
                 if self.excludeFiles and fname in self.excludeFiles:
-                    print('File "' + fname + '" is in the "exclude" file. Skipping download...')
+                    print(
+                        'File "'
+                        + fname
+                        + '" is in the "exclude" file. Skipping download...'
+                    )
                     return
 
-                with open(fpath, 'wb') as f:
+                with open(fpath, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
@@ -353,34 +436,58 @@ class Session:
                             else:
                                 eta = "NA"
                             if not self.options.download_all:
-                                print("\r" + sizeofmetric_fmt(fsize) + " " +
-                                      str(round(dsize / fsize * 100)) + "% " +
-                                      str(sizeofmetric_fmt(rate)) + "/sec ",
-                                      "ETA:", eta,
-                                      end='     ')
+                                print(
+                                    "\r"
+                                    + sizeofmetric_fmt(fsize)
+                                    + " "
+                                    + str(round(dsize / fsize * 100))
+                                    + "% "
+                                    + str(sizeofmetric_fmt(rate))
+                                    + "/sec ",
+                                    "ETA:",
+                                    eta,
+                                    end="     ",
+                                )
                             else:
                                 self.queue.put([len(chunk), False])
 
                 if os.path.exists(fpath):
-                    md5Hash = hashlib.md5(open(fpath, 'rb').read()).hexdigest()
+                    md5Hash = hashlib.md5(open(fpath, "rb").read()).hexdigest()
                     if [md5Hash, fname] in self.md5List:
                         print('File "' + fname + '" successfully downloaded.')
-                    elif self.options.checksumFile and [md5Hash, fname] in self.localMd5List:
-                        print('File "' + fname + '" successfully downloaded (validated via local MD5 list).')
-                    elif self.options.checksumFile and [md5Hash, fname] not in self.localMd5List:
+                    elif (
+                        self.options.checksumFile
+                        and [md5Hash, fname] in self.localMd5List
+                    ):
+                        print(
+                            'File "'
+                            + fname
+                            + '" successfully downloaded (validated via local MD5 list).'
+                        )
+                    elif (
+                        self.options.checksumFile
+                        and [md5Hash, fname] not in self.localMd5List
+                    ):
                         # Open the file for writing.
-                        f = open(self.options.checksumFile, 'a')
-                        f.write(md5Hash + ', ' + fname + "\n")
+                        f = open(self.options.checksumFile, "a")
+                        f.write(md5Hash + ", " + fname + "\n")
                         f.close()
                         self.localMd5List.append([md5Hash, fname])
                         print(
-                            'File "' + fname + '" downloaded, MD5 check added to local md5 list, file removed and re-downloading for md5 validation...')
+                            'File "'
+                            + fname
+                            + '" downloaded, MD5 check added to local md5 list, file removed and re-downloading for md5 validation...'
+                        )
                         os.remove(fpath)
 
                         # Re-download the file
                         self.download_file(url, fsize, fname)
                     else:
-                        print('File "' + fname + '" downloaded but did not pass the MD5 check.')
+                        print(
+                            'File "'
+                            + fname
+                            + '" downloaded but did not pass the MD5 check.'
+                        )
 
             if self.options.download_all:
                 self.queue.put([0, True])
@@ -389,7 +496,9 @@ class Session:
         return
 
     def logout(self):
-        response = requests.get(self.options.host + '/accounts/logout/', cookies=self.cookies)
+        response = requests.get(
+            self.options.host + "/accounts/logout/", cookies=self.cookies
+        )
         if response.status_code == 200:
             print("[logout] Logged out.")
         else:
@@ -398,23 +507,24 @@ class Session:
 
 def print_rec(dic, depth):
     for item in dic:
-        if item['type'] == 'directory':
+        if item["type"] == "directory":
             for i in range(depth * 2):
-                print("  ", end='')
+                print("  ", end="")
             print("└──", item["name"])
-            print_rec(item['children'], depth + 1)
+            print_rec(item["children"], depth + 1)
         else:
             for i in range(depth * 2):
-                print("  ", end='')
-            print("├──", item["name"], 'Size: ', item['size'], 'bytes')
+                print("  ", end="")
+            print("├──", item["name"], "Size: ", item["size"], "bytes")
 
 
 def get_listing(session):
     if session.options.recursive:
-        response = requests.get(session.options.host + '/data_api_recursive/' +
-                                session.options.project,
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host + "/data_api_recursive/" + session.options.project,
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         try:
             datafiles = json.loads(response.text)
             print_rec(datafiles["children"], 0)
@@ -422,59 +532,76 @@ def get_listing(session):
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.get(session.options.host + '/data_api2/' +
-                                session.options.project +
-                                ('/y' if session.options.dirs is True else '/n'),
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host
+            + "/data_api2/"
+            + session.options.project
+            + ("/y" if session.options.dirs is True else "/n"),
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         try:
             datafiles = json.loads(response.text)
             for file in datafiles:
                 if session.options.listingSize:
-                    print(file['name'] + '   (' + sizeofmetric_fmt(file['size']) + ')')
+                    print(file["name"] + "   (" + sizeofmetric_fmt(file["size"]) + ")")
                 else:
-                    print(file['name'])
+                    print(file["name"])
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
 
 
 def download(session):
-    response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
-                            cookies=session.cookies,
-                            params={"cd": session.options.dir})
+    response = requests.get(
+        session.options.host + "/data_api2/" + session.options.project + "/n",
+        cookies=session.cookies,
+        params={"cd": session.options.dir},
+    )
     fsize = 0
-    fname = ''
+    fname = ""
     try:
         datafiles = json.loads(response.text)
 
         # Obtain the MD5 hash of the files, when the file to download is a '.gz' file.
-        if not session.md5List and '.gz' in session.options.download:
+        if not session.md5List and ".gz" in session.options.download:
             for file in datafiles:
-                if file['name'] == 'checksums.md5':
+                if file["name"] == "checksums.md5":
                     # Get the code to obtain the file
-                    response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                                            params={"project": session.options.project,
-                                                    "filename": "/" + session.options.dir + "/" +
-                                                                file['name']
-                                                    })
+                    response = requests.get(
+                        session.options.host + "/gen_session_file/",
+                        cookies=session.cookies,
+                        params={
+                            "project": session.options.project,
+                            "filename": "/" + session.options.dir + "/" + file["name"],
+                        },
+                    )
                     # Create the URL to obtain the file (one time use)
-                    url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+                    url = (
+                        session.options.host
+                        + "/session_files2/"
+                        + session.options.project
+                        + "/"
+                        + response.text
+                    )
                     md5 = requests.get(url, stream=True, cookies=session.cookies)
 
                     if session.options.checksumFile:
                         # Open the file once for writing. Then loop for writing and then close.
-                        f = open(session.options.checksumFile, 'a')
+                        f = open(session.options.checksumFile, "a")
 
                     # Split the MD5 file to a list<str,str>
                     for lst in md5.text.split("\n"):
-                        md5Obj = lst.split('  ')
+                        md5Obj = lst.split("  ")
                         session.md5List.append(md5Obj)
 
                         # If a local checksum file is provided, add the online ones to the local file.
-                        if session.options.checksumFile and md5Obj not in session.localMd5List:
+                        if (
+                            session.options.checksumFile
+                            and md5Obj not in session.localMd5List
+                        ):
                             # Add the new md5 value to the local file.
-                            f.write(md5Obj[0] + ', ' + md5Obj[1] + "\n")
+                            f.write(md5Obj[0] + ", " + md5Obj[1] + "\n")
 
                             # Store the object in the list for reference.
                             session.localMd5List.append(md5Obj)
@@ -483,20 +610,29 @@ def download(session):
                         f.close()
 
         for file in datafiles:
-            if file['name'] == session.options.download:
-                fsize = file['size']
+            if file["name"] == session.options.download:
+                fsize = file["size"]
                 if fsize == 0:
                     fsize = 1
-                fname = file['name']
+                fname = file["name"]
     except json.decoder.JSONDecodeError:
         print("[download] [get_listing] Error reading response: ", response.text)
         exit(1)
-    response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                            params={"project": session.options.project,
-                                    "filename": "/" + session.options.dir + "/" +
-                                                session.options.download
-                                    })
-    url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+    response = requests.get(
+        session.options.host + "/gen_session_file/",
+        cookies=session.cookies,
+        params={
+            "project": session.options.project,
+            "filename": "/" + session.options.dir + "/" + session.options.download,
+        },
+    )
+    url = (
+        session.options.host
+        + "/session_files2/"
+        + session.options.project
+        + "/"
+        + response.text
+    )
     session.download_file(url, fsize, fname)
     print()
 
@@ -506,38 +642,40 @@ def get_list(res, session_dir):
 
     def print_list(dic, path):
         for item in dic:
-            if item['type'] == 'directory':
-                d = os.path.join(path, item['name'])
+            if item["type"] == "directory":
+                d = os.path.join(path, item["name"])
                 if not os.path.isdir(d):
                     try:
                         os.makedirs(d)
                     except FileExistsError:
                         pass  # this can be the case with multithreading
-                print_list(item['children'], d)
+                print_list(item["children"], d)
             else:
-                flist.append({"name": path + "/" + item["name"],
-                              "size": item["size"]})
+                flist.append({"name": path + "/" + item["name"], "size": item["size"]})
 
-    print_list(json.loads(res)['children'], session_dir)
+    print_list(json.loads(res)["children"], session_dir)
     return flist
 
 
 def download_all(session):
     datafiles = []
     if session.options.recursive:
-        response = requests.get(session.options.host + '/data_api_recursive/' +
-                                session.options.project,
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host + "/data_api_recursive/" + session.options.project,
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         try:
             datafiles = get_list(response.text, session.options.dir)
         except json.decoder.JSONDecodeError:
             print("[get_listing] Error reading response:", response.text)
             exit(1)
     else:
-        response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host + "/data_api2/" + session.options.project + "/n",
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         try:
             datafiles = json.loads(response.text)
         except json.decoder.JSONDecodeError:
@@ -546,20 +684,29 @@ def download_all(session):
 
     # Obtain the MD5 hash of the files, when the file to download is a '.gz' file.
     for file in datafiles:
-        if 'checksums.md5' in file['name']:
+        if "checksums.md5" in file["name"]:
             # Get the code to obtain the file
-            response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                                    params={"project": session.options.project,
-                                            "filename": "/" + session.options.dir + "/" +
-                                                        file['name']
-                                            })
+            response = requests.get(
+                session.options.host + "/gen_session_file/",
+                cookies=session.cookies,
+                params={
+                    "project": session.options.project,
+                    "filename": "/" + session.options.dir + "/" + file["name"],
+                },
+            )
             # Create the URL to obtain the file (one time use)
-            url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+            url = (
+                session.options.host
+                + "/session_files2/"
+                + session.options.project
+                + "/"
+                + response.text
+            )
             md5 = requests.get(url, stream=True, cookies=session.cookies)
 
             if session.options.checksumFile:
                 # Open the file once for writing. Then loop for writing and then close.
-                f = open(session.options.checksumFile, 'a')
+                f = open(session.options.checksumFile, "a")
 
             # Split the MD5 file to a list<str,str>
             for lst in md5.text.split("\n"):
@@ -567,13 +714,13 @@ def download_all(session):
                 if not (lst and lst.strip()):
                     continue
 
-                md5Obj = lst.split('  ')
+                md5Obj = lst.split("  ")
                 session.md5List.append(md5Obj)
 
                 # If a local checksum file is provided, add the online ones to the local file.
                 if session.options.checksumFile and md5Obj not in session.localMd5List:
                     # Add the new md5 value to the local file.
-                    f.write(md5Obj[0] + ', ' + md5Obj[1] + "\n")
+                    f.write(md5Obj[0] + ", " + md5Obj[1] + "\n")
 
                     # Store the object in the list for reference.
                     session.localMd5List.append(md5Obj)
@@ -584,26 +731,38 @@ def download_all(session):
     dl_list = []
     dl_sum = 0
     linux = False
-    if platform.platform().startswith('Linux'):
+    if platform.platform().startswith("Linux"):
         linux = True
     else:
         print("Non-linux platform supports no multi-threaded downloading")
         session.options.download_all = False
 
     for file in datafiles:
-        fsize = file['size'] if file['size'] != 0 else 1
+        fsize = file["size"] if file["size"] != 0 else 1
         dl_sum += fsize
-        filename = "/" + (session.options.dir if not session.options.recursive else '') + "/" + file['name']
-        response = requests.get(session.options.host + '/gen_session_file/', cookies=session.cookies,
-                                params={"project": session.options.project,
-                                        "filename": filename
-                                        })
-        url = session.options.host + '/session_files2/' + session.options.project + "/" + response.text
+        filename = (
+            "/"
+            + (session.options.dir if not session.options.recursive else "")
+            + "/"
+            + file["name"]
+        )
+        response = requests.get(
+            session.options.host + "/gen_session_file/",
+            cookies=session.cookies,
+            params={"project": session.options.project, "filename": filename},
+        )
+        url = (
+            session.options.host
+            + "/session_files2/"
+            + session.options.project
+            + "/"
+            + response.text
+        )
 
         if linux:
-            dl_list.append([url, fsize, file['name']])
+            dl_list.append([url, fsize, file["name"]])
         else:
-            session.download_file(url, fsize, file['name'])
+            session.download_file(url, fsize, file["name"])
     if not linux:
         exit(0)
 
@@ -621,7 +780,11 @@ def download_all(session):
     start = time.time()
     started = []
     while True:
-        if current_processes < max_processes and finished_processes < number_of_processes and current_process < number_of_processes:
+        if (
+            current_processes < max_processes
+            and finished_processes < number_of_processes
+            and current_process < number_of_processes
+        ):
             processes[current_process].start()
             started.append(processes[current_process])
             current_process += 1
@@ -644,13 +807,21 @@ def download_all(session):
         if dl_sum > 100:  # preventing devision by zero errors
             estimatedtimeofarrival = "NA"
             if rate > 0:
-                estimatedtimeofarrival = human_readable_eta((dl_sum - downloaded_bytes) / rate)
-            print("\r", str(round(downloaded_bytes / dl_sum * 100)) + "%",
-                  "Downloading", sizeofmetric_fmt(downloaded_bytes), "of",
-                  sizeofmetric_fmt(dl_sum),
-                  str(sizeofmetric_fmt(rate)) + "/sec",
-                  "ETA:", estimatedtimeofarrival,
-                  end='     ')
+                estimatedtimeofarrival = human_readable_eta(
+                    (dl_sum - downloaded_bytes) / rate
+                )
+            print(
+                "\r",
+                str(round(downloaded_bytes / dl_sum * 100)) + "%",
+                "Downloading",
+                sizeofmetric_fmt(downloaded_bytes),
+                "of",
+                sizeofmetric_fmt(dl_sum),
+                str(sizeofmetric_fmt(rate)) + "/sec",
+                "ETA:",
+                estimatedtimeofarrival,
+                end="     ",
+            )
 
         if finished_processes == number_of_processes:
             print("\nDownloading complete")
@@ -670,7 +841,7 @@ def main():
         download_all(session)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
