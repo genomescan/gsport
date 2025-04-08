@@ -1,12 +1,14 @@
-from multiprocessing import Process
 import time
-from helpers.sizeofmetric import size_of_metric_fmt
+from multiprocessing import Process
+
 from helpers.eta_readable import human_readable_eta
 from helpers.print_functions import print_info
+from helpers.sizeofmetric import size_of_metric_fmt
 
-def download_parallel_linux(session, dl_list: list[list], dl_sum: int) -> None:
+
+def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
     """
-        Multithreading of download for Linux. It starts by making a process of every download by setting the target to
+        Multithreading of download. It starts by making a process of every download by setting the target to
         session.download_file with the parameters of the file. It will then start the processes until the capacity is reached,
         or there are no more left over processes. It will then add the size of downloaded chunks to the total amount downloaded.
         And close no longer active processes. It will then print the progress.
@@ -16,10 +18,11 @@ def download_parallel_linux(session, dl_list: list[list], dl_sum: int) -> None:
     :param dl_sum: The total amount of bytes of all files to be downloaded.
     :return: None
     """
-    # Linux multi-threading.
+
     current_processes_amount = 0  # The amount of processes currently active.
     max_processes = int(
-        session.options.threads)  # The maximum amount of processes that are allowed to be active at a time.
+        session.options.threads
+    )  # The maximum amount of processes that are allowed to be active at a time.
     number_of_processes = len(dl_list)  # The amount of processes.
     finished_processes_amount = 0  # The amount of finished processes.
     current_process_index = 0  # The index of the current process in the list of processes.
@@ -32,12 +35,18 @@ def download_parallel_linux(session, dl_list: list[list], dl_sum: int) -> None:
     start = time.time()
     started = []
     while True:
-        if current_processes_amount < max_processes and finished_processes_amount < number_of_processes and current_process_index < number_of_processes:
+        if (
+            current_processes_amount < max_processes
+            and finished_processes_amount < number_of_processes
+            and current_process_index < number_of_processes
+        ):
             processes[current_process_index].start()
             started.append(processes[current_process_index])
             current_process_index += 1
             current_processes_amount += 1
-        if current_processes_amount < max_processes and current_process_index < number_of_processes:  # Make sure we are at capacity.
+        if (
+            current_processes_amount < max_processes and current_process_index < number_of_processes
+        ):  # Make sure we are at capacity.
             continue
 
         status = session.queue.get()
@@ -56,12 +65,18 @@ def download_parallel_linux(session, dl_list: list[list], dl_sum: int) -> None:
             estimated_time_of_arrival = "Never"  # It was this or "After the heat death of the universe" by mmterpstra.
             if rate > 0:
                 estimated_time_of_arrival = human_readable_eta((dl_sum - downloaded_bytes) / rate)
-            print("\r", str(round(downloaded_bytes / dl_sum * 100)) + "%",
-                  "Downloading", size_of_metric_fmt(downloaded_bytes), "of",
-                  size_of_metric_fmt(dl_sum),
-                  str(size_of_metric_fmt(rate)) + "/sec",
-                  "ETA:", estimated_time_of_arrival,
-                  end='     ')
+            print(
+                "\r",
+                str(round(downloaded_bytes / dl_sum * 100)) + "%",
+                "Downloading",
+                size_of_metric_fmt(downloaded_bytes),
+                "of",
+                size_of_metric_fmt(dl_sum),
+                str(size_of_metric_fmt(rate)) + "/sec",
+                "ETA:",
+                estimated_time_of_arrival,
+                end="     ",
+            )
         if finished_processes_amount == number_of_processes:
             print_info("\nDownloading complete")
             break

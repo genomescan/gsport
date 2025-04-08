@@ -1,22 +1,11 @@
-import json
 import os
-
-import time
 
 import requests
 
-from multiprocessing import Process
-
 from .listings import get_list
-from .print_functions import print_warning, print_error
-from .sizeofmetric import size_of_metric_fmt
-from .eta_readable import human_readable_eta
-
-from variables import VERIFY_FILES_URL
-
-from terminalcolorpy import printcolor
-
+from .print_functions import print_error, print_warning
 from .url import get_url
+
 
 def download(session) -> None:
     """
@@ -32,19 +21,23 @@ def download(session) -> None:
             params={"cd": session.options.dir},
         )
         datafiles = response.json()
-        print(response.text)
+
         datafiles = datafiles["children"]
     elif session.options.download_all and session.options.recursive:
-        response = requests.get(session.options.host + '/data_api_recursive/' +
-                                session.options.project,
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host + "/data_api_recursive/" + session.options.project,
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         datafiles = get_list(response.text, session.options.dir)
     elif session.options.download_all:
-        response = requests.get(session.options.host + '/data_api2/' + session.options.project + '/n',
-                                cookies=session.cookies,
-                                params={"cd": session.options.dir})
+        response = requests.get(
+            session.options.host + "/data_api2/" + session.options.project + "/n",
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
         datafiles = response.json()
+        print(datafiles)
 
     else:
         exit(1)
@@ -59,7 +52,9 @@ def download(session) -> None:
             allowed = {i["name"] for i in datafiles}
             not_allowed = requested - allowed
             for i in not_allowed:
-                print_warning(f"WARNING: {i} is not a valid file for download, make sure the path is spelled correctly.")
+                print_warning(
+                    f"WARNING: {i} is not a valid file for download, make sure the path is spelled correctly."
+                )
             if input("Continuing on with download of valid files? (y/n)") != "y":
                 exit(1)
     if not os.path.isdir(session.options.output):  # Create the output folder if it doesn't exist.
@@ -79,11 +74,14 @@ def make_directories(files: list[dict[str, str | int]], directory_path_length: i
     """
     for file in files:  # Go through every file.
         total_path = output  # Begin the path with the output directory.
-        for path in file["name"].split("/")[directory_path_length:-1]:  # Loop through the elements of the path, but not the file. This works because the server should never return "\" based paths.
+        for path in file["name"].split("/")[
+            directory_path_length:-1
+        ]:  # Loop through the elements of the path, but not the file. This works because the server should never return "\" based paths.
             total_path = os.path.join(total_path, path)  # Append the path element to the total path.
-            if not os.path.isdir(total_path):  # Create the directory with the using the total path if it doesn't exist yet.
+            if not os.path.isdir(
+                total_path
+            ):  # Create the directory with the using the total path if it doesn't exist yet.
                 try:
                     os.makedirs(total_path)
                 except FileExistsError:
                     pass  # This can be the case with multithreading.
-
