@@ -1,3 +1,4 @@
+import unittest
 from unittest.mock import patch
 
 import requests_mock
@@ -12,16 +13,17 @@ Author: Gonzalo Vela
 """
 
 
-@patch("sys.argv", ["script_name"])
-@patch.object(Session, "login")
-def test_login_false(mock_login):
-    """
-    Test that unauthorized cookies trigger the login process.
-    """
+class TestLogin(unittest.TestCase):
+    @patch("sys.argv", ["script_name"])
+    @patch.object(Session, "login")
+    def test_login_false(self, mock_login):
+        """
+        Test that unauthorized cookies trigger the login process.
+        """
 
-    with requests_mock.Mocker() as m:
-        m.get("https://portal.genomescan.nl//logged_in_api/", text='{"logged_in": false}', status_code=200)
+        with requests_mock.Mocker() as m:
+            m.get("https://portal.genomescan.nl//logged_in_api/", text='{"logged_in": false}', status_code=200)
 
-        main()
+            main()
 
-        mock_login.assert_called_once()
+            mock_login.assert_called_once()
