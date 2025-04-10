@@ -1,8 +1,8 @@
 import sys
 
 from classes import Options, Session
-from helpers.listings import list_all_projects, get_listing
 from helpers.downloads import download
+from helpers.listings import get_listing, list_all_projects
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
         download(session)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:

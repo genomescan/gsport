@@ -1,5 +1,6 @@
 from terminalcolorpy import colored, printcolor
 
+
 def print_error(text: str) -> None:
     printcolor({"text": text, "color": "red"})
 
@@ -20,13 +21,17 @@ def print_rec(dic, depth: int) -> None:
     :return: None
     """
     for item in dic:
-        if item['type'] == "directory":
+        if item["type"] == "directory":
             for i in range(depth * 2):
-                print("  ", end='')
+                print("  ", end="")
             print("└──", colored(text=item["name"], color="cyan"))
-            print_rec(item['children'], depth + 1)
+            print_rec(item["children"], depth + 1)
         else:
             for i in range(depth * 2):
-                print("  ", end='')
-            print("├──", colored(text=item["name"], color="yellow"), 'Size: ',
-                  colored(text=str(item["size"]), color="red"))
+                print("  ", end="")
+            print(
+                "├──",
+                colored(text=item["name"], color="yellow"),
+                "Size: ",
+                colored(text=str(item["size"]), color="red"),
+            )

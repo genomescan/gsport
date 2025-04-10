@@ -2,71 +2,110 @@ import argparse
 import os
 
 from helpers import print_functions
-from variables import HOST_URL, GSPORT_VERSION, LIST_EXAMPLE_MESSAGE, DOWNLOAD_EXAMPLE_MESSAGE, DOWNLOAD_ALL_EXAMPLE_MESSAGE
+from variables import (
+    DOWNLOAD_ALL_EXAMPLE_MESSAGE,
+    DOWNLOAD_EXAMPLE_MESSAGE,
+    GSPORT_VERSION,
+    HOST_URL,
+    LIST_EXAMPLE_MESSAGE,
+)
+
 
 class Options:
     def __init__(self, argv):
         # Create the parser for gsport.
-        parser = argparse.ArgumentParser(prog='gsport',
-                                         description='GSPORT command-line tool for accessing GenomeScans new Customer Portal',
-                                         epilog='For the new customer portal only.')
-        subparsers = parser.add_subparsers(title='subcommands',
-                                           description='valid subcommands',
-                                           help='use subcommand with -h for additional help', dest="subparser_name")
+        parser = argparse.ArgumentParser(
+            prog="gsport",
+            description="GSPORT command-line tool for accessing GenomeScans new Customer Portal",
+            epilog="For the new customer portal only.",
+        )
+        subparsers = parser.add_subparsers(
+            title="subcommands",
+            description="valid subcommands",
+            help="use subcommand with -h for additional help",
+            dest="subparser_name",
+        )
 
         # Parser commands.
-        parser.add_argument("-H", "--host", default=HOST_URL, help=f"The host site default is %(default)s")
+        parser.add_argument("-H", "--host", default=HOST_URL, help="The host site default is %(default)s")
         parser.add_argument("-c", "--clear-cookies", action="store_true", help="clear cookies and logout session")
-        parser.add_argument("-v", "--version", help="show the software version and exit", action="version",
-                            version=f'%(prog)s {GSPORT_VERSION}')
-        parser.add_argument("-p", "--projects", help="show all the projects that a user has access to",
-                            action="store_true")
+        parser.add_argument(
+            "-v",
+            "--version",
+            help="show the software version and exit",
+            action="version",
+            version=f"%(prog)s {GSPORT_VERSION}",
+        )
+        parser.add_argument(
+            "-p", "--projects", help="show all the projects that a user has access to", action="store_true"
+        )
 
         # List of shared commands for subcommands.
         project_parser = argparse.ArgumentParser(add_help=False)
-        project_parser.add_argument("PROJECT",
-                                    help="[projectcode] for specific projects")
+        project_parser.add_argument("PROJECT", help="[projectcode] for specific projects")
         download_and_listing_shared = argparse.ArgumentParser(add_help=False)
-        download_and_listing_shared.add_argument("-d", "--cd", default=".",
-                                                 help="files (or directories) in dir, dirs can be appended with forward"
-                                                      " slashes: / (eg. 'Analysis/Sample 1', with quotes) or Analysis/s1/bam"
-                                                      " (without spaces, no quotes needed)")
+        download_and_listing_shared.add_argument(
+            "-d",
+            "--cd",
+            default=".",
+            help="files (or directories) in dir, dirs can be appended with forward"
+            " slashes: / (eg. 'Analysis/Sample 1', with quotes) or Analysis/s1/bam"
+            " (without spaces, no quotes needed)",
+        )
         downloads_shared = argparse.ArgumentParser(add_help=False)
-        downloads_shared.add_argument("-o", "--output", default=".", help="directory that downloaded files will go in, default is current directory")
+        downloads_shared.add_argument(
+            "-o",
+            "--output",
+            default=".",
+            help="directory that downloaded files will go in, default is current directory",
+        )
 
         # List subcommand.
-        subparser_list = subparsers.add_parser('list'
-                                               , formatter_class=argparse.RawDescriptionHelpFormatter,
-                                               help='prints the output',
-                                               description="this subcommand prints the output",
-                                               epilog=LIST_EXAMPLE_MESSAGE,
-                                               parents=[project_parser, download_and_listing_shared])
+        subparser_list = subparsers.add_parser(
+            "list",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            help="prints the output",
+            description="this subcommand prints the output",
+            epilog=LIST_EXAMPLE_MESSAGE,
+            parents=[project_parser, download_and_listing_shared],
+        )
         list_options_group = subparser_list.add_mutually_exclusive_group()
         list_options_group.add_argument("-m", "--dirs", action="store_true", help="show directories")
-        list_options_group.add_argument("-r", "--recursive", action="store_true",
-                                        help="recursive complete tree from --cd "
-                                             "[dir] or everything if no --cd option is given ")
+        list_options_group.add_argument(
+            "-r",
+            "--recursive",
+            action="store_true",
+            help="recursive complete tree from --cd " "[dir] or everything if no --cd option is given ",
+        )
         subparser_list.set_defaults(func=self.L)
 
         # Download subcommand.
-        subparser_download = subparsers.add_parser('download', help='download specified files',
-                                                   description="this allows the download of individual files, use the full path for files",
-                                                   epilog=DOWNLOAD_EXAMPLE_MESSAGE,
-                                                   parents=[project_parser, downloads_shared]
-                                                   )
+        subparser_download = subparsers.add_parser(
+            "download",
+            help="download specified files",
+            description="this allows the download of individual files, use the full path for files",
+            epilog=DOWNLOAD_EXAMPLE_MESSAGE,
+            parents=[project_parser, downloads_shared],
+        )
         subparser_download.add_argument("FILE", help="files to download seperated by spaces", nargs="+")
         subparser_download.set_defaults(func=self.D)
 
         # Download all subcommand.
-        subparser_download_all = subparsers.add_parser('all', formatter_class=argparse.RawDescriptionHelpFormatter,
-                                                       help='download all files',
-                                                       description="this subcommand allows the download of all files",
-                                                       epilog=DOWNLOAD_ALL_EXAMPLE_MESSAGE,
-                                                       parents=[project_parser, download_and_listing_shared, downloads_shared])
+        subparser_download_all = subparsers.add_parser(
+            "all",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            help="download all files",
+            description="this subcommand allows the download of all files",
+            epilog=DOWNLOAD_ALL_EXAMPLE_MESSAGE,
+            parents=[project_parser, download_and_listing_shared, downloads_shared],
+        )
         subparser_download_all.add_argument("-t", "--threads", type=int, default=os.cpu_count())
-        subparser_download_all.add_argument("-r", "--recursive", action="store_true",
-                                            help="recursive complete tree from --cd "
-                                                 "[dir] or everything if no --cd option is given ")
+        subparser_download_all.add_argument(
+            "-r",
+            "--recursive",
+            action="store_true",
+            help="recursive complete tree from --cd " "[dir] or everything if no --cd option is given ",
+        )
         subparser_download_all.set_defaults(func=self.A)
 
         # Parse arguments.

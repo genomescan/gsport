@@ -38,7 +38,7 @@ jobs:
       - name: Setup python environment # setting python environment to 3.x
         uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Create venv
         run:
           python -m venv venv
