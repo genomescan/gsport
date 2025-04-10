@@ -1,5 +1,6 @@
 def usage():
-    print("""
+    print(
+        """
 Usage: gsport [options]
 GSPORT command-line tool for accessing GenomeScan Customer Portal
 
@@ -10,14 +11,14 @@ Options
 -s --size return a list with the size
 -d --download [filename]
 -a --download-all download all files from project -p or --project
--f --force downloading files even if they already exist 
+-f --force downloading files even if they already exist
 -c --clear-cookies clear session/cookies
 -t --workers [n] allow n concurrent workers (defaults to number of logical cpu cores) (works only on Linux)
 --dirs show directories instead of files (combined with -l or --list)
---cd [dir] show files (or directories) in dir, 
+--cd [dir] show files (or directories) in dir,
      dirs can be appended with forward slashes: / (eg. "Analysis/Sample 1", with quotes)
      or Analysis/s1/bam (without spaces, no quotes needed)
--r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given 
+-r --recursive lists/downloads complete tree from --cd [dir] or everything if no --cd option is given
 -h --help prints this help
 -v --version show gsport version
 -i --ignore Ignore MD5 checksum result and download only files not on the system
@@ -42,4 +43,5 @@ Example usage: gsport -p 100000 -l shows all the files under that project
                gsport -p 100000 -a -E "C:\\project\\exclude.txt"
                gsport -p 100000 -a -C "C:\\project\\localChecksums.md5"
                gsport -p 100000 -a -P "C:\\project\\exclude.txt"
-""")
+"""
+    )

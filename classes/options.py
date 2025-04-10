@@ -1,12 +1,13 @@
 import getopt
 import os
 
-from gsport.helpers import usage
-from gsport.variables import GSPORT_VERSION
+from helpers import usage
+from variables import GSPORT_VERSION
 
 
 def version():
     print(GSPORT_VERSION)
+
 
 class Options:
     def __init__(self, argv):
@@ -24,7 +25,7 @@ class Options:
         self.clear_cookies = False
         self.threads = os.cpu_count()
         self.dirs = False
-        self.dir = ''
+        self.dir = ""
         self.recursive = False
         self.includeFile = None
         self.excludeFile = None
@@ -32,12 +33,31 @@ class Options:
         self.path = None
 
         try:
-            opts, args = getopt.getopt(argv[1:],
-                                       "H:p:lsd:afchrivt:I:E:C:P:",
-                                       ["host=", "project=", "list", "size",
-                                        "download=", "download-all", "force", "threads", "version",
-                                        "clear-cookies", "help", "dirs", "cd=", "recursive", "ignore",
-                                        "includeFile=", "excludeFile=", "checksumFile=", "path="])
+            opts, args = getopt.getopt(
+                argv[1:],
+                "H:p:lsd:afchrivt:I:E:C:P:",
+                [
+                    "host=",
+                    "project=",
+                    "list",
+                    "size",
+                    "download=",
+                    "download-all",
+                    "force",
+                    "threads",
+                    "version",
+                    "clear-cookies",
+                    "help",
+                    "dirs",
+                    "cd=",
+                    "recursive",
+                    "ignore",
+                    "includeFile=",
+                    "excludeFile=",
+                    "checksumFile=",
+                    "path=",
+                ],
+            )
 
         except getopt.GetoptError as err:
             print(err)
@@ -78,30 +98,30 @@ class Options:
             elif o in ("-I", "--includeFile"):
                 if os.path.isfile(a.strip()):
                     self.includeFile = a.strip()
-                    print('Include file: ' + self.includeFile)
+                    print("Include file: " + self.includeFile)
                 else:
-                    print('File for -I parameter does not exist: ' + a.strip())
+                    print("File for -I parameter does not exist: " + a.strip())
                     exit()
             elif o in ("-E", "--excludeFile"):
                 if os.path.isfile(a.strip()):
                     self.excludeFile = a.strip()
-                    print('Exclude file: ' + self.excludeFile)
+                    print("Exclude file: " + self.excludeFile)
                 else:
-                    print('File for -E parameter does not exist: ' + a.strip())
+                    print("File for -E parameter does not exist: " + a.strip())
                     exit()
             elif o in ("-C", "--checksumFile"):
                 if not os.path.isfile(a.strip()):
                     # Create a new file.
                     open(a.strip(), "x")
-                    print('Local checksum file did not exist. New file created.')
+                    print("Local checksum file did not exist. New file created.")
                 self.checksumFile = a.strip()
-                print('Local checksum file: ' + self.checksumFile)
+                print("Local checksum file: " + self.checksumFile)
 
             elif o in ("-P", "--path"):
                 if os.path.isdir(a.strip()):
                     self.path = a.strip()
                 else:
-                    print(a.strip() + ' is not a folder.')
+                    print(a.strip() + " is not a folder.")
             elif o in ("--dirs",):
                 self.dirs = True
             elif o in ("--cd",):

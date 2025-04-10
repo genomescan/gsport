@@ -1,0 +1,11 @@
+[flake8]
+extend-select = B950
+extend-ignore = E203,E501,E701,W605,E741
+max-line-length = 120
+per-file-ignores = __init__.py:F401
+exclude =
+    __pycache__,
+    env,
+    .env,
+    venv,
+    .venv
