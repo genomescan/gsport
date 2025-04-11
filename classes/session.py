@@ -48,6 +48,7 @@ class Session:
         print_info("[login] Get login page")
         # Perform a GET request to obtain the CSRF token
         response = session.get(HOST_URL + LOGIN_URL)
+        print(response.cookies)
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
