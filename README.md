@@ -2,14 +2,6 @@
 
 GSport is a command-line tool designed to accelerate file downloads from the GenomeScan Customer Portal. It leverages multiprocessing to significantly improve download speeds and efficiency.
 
-## Key Features
-
-- Fast, parallel file downloads using multiple processes
-- Supports recursive and selective downloads
-- Multithreading compatibility on Windows
-- Include/exclude lists for fine-grained control
-- Optional MD5 checksum verification
-
 ## Prerequisites
 
 Ensure you have the following installed:
