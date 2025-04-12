@@ -1,8 +1,8 @@
 import sys
 
-from classes import Options, Session
-from helpers.downloads import download
-from helpers.listings import get_listing, list_all_projects
+from src.classes import Options, Session
+from src.helpers.downloads import download
+from src.helpers.listings import get_listing, list_all_projects
 
 
 def main():

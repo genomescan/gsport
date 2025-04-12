@@ -1,9 +1,9 @@
 import time
 from multiprocessing import Process
 
-from helpers.eta_readable import human_readable_eta
-from helpers.print_functions import print_info
-from helpers.sizeofmetric import size_of_metric_fmt
+from src.helpers.eta_readable import human_readable_eta
+from src.helpers.print_functions import print_info
+from src.helpers.sizeofmetric import size_of_metric_fmt
 
 
 def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
@@ -25,7 +25,9 @@ def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
     )  # The maximum amount of processes that are allowed to be active at a time.
     number_of_processes = len(dl_list)  # The amount of processes.
     finished_processes_amount = 0  # The amount of finished processes.
-    current_process_index = 0  # The index of the current process in the list of processes.
+    current_process_index = (
+        0  # The index of the current process in the list of processes.
+    )
     downloaded_bytes = 0  # The total amount of downloaded bytes.
     processes = []
 
@@ -45,7 +47,8 @@ def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
             current_process_index += 1
             current_processes_amount += 1
         if (
-            current_processes_amount < max_processes and current_process_index < number_of_processes
+            current_processes_amount < max_processes
+            and current_process_index < number_of_processes
         ):  # Make sure we are at capacity.
             continue
 
@@ -64,7 +67,9 @@ def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
         if dl_sum > 100:  # Preventing division by zero errors.
             estimated_time_of_arrival = "Never"  # It was this or "After the heat death of the universe" by mmterpstra.
             if rate > 0:
-                estimated_time_of_arrival = human_readable_eta((dl_sum - downloaded_bytes) / rate)
+                estimated_time_of_arrival = human_readable_eta(
+                    (dl_sum - downloaded_bytes) / rate
+                )
             print(
                 "\r",
                 str(round(downloaded_bytes / dl_sum * 100)) + "%",

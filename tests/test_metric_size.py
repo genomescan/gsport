@@ -1,6 +1,8 @@
 import unittest
 
-from helpers.sizeofmetric import size_of_metric_fmt  # Adjust to match your structure
+from src.helpers.sizeofmetric import (  # Adjust to match your structure
+    size_of_metric_fmt,
+)
 
 """
 Tests for the converter to metric size function

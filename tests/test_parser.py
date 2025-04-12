@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from classes import Options
+from src.classes import Options
 
 """
 Tests for the argument parser in the Options class.

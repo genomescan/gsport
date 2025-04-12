@@ -7,17 +7,26 @@ from pathlib import Path
 
 import requests
 
-from classes import MyCookieJar
-from helpers.eta_readable import human_readable_eta
-from helpers.print_functions import print_error, print_info, print_warning
-from helpers.sizeofmetric import size_of_metric_fmt
-from variables import GSPORT_VERSION, HOST_URL, LOGIN_URL, LOGOUT_URL, TWO_FACTOR_AUTH_URL
+from src.classes import MyCookieJar
+from src.helpers.eta_readable import human_readable_eta
+from src.helpers.print_functions import print_error, print_info, print_warning
+from src.helpers.sizeofmetric import size_of_metric_fmt
+from src.variables import (
+    GSPORT_VERSION,
+    HOST_URL,
+    LOGGED_IN_URL,
+    LOGIN_URL,
+    LOGOUT_URL,
+    TWO_FACTOR_AUTH_URL,
+)
 
 
 class Session:
     def __init__(self, options):
         self.options = options
-        self.cookies = MyCookieJar(filename=os.path.join(str(Path.home()), ".gs_cookies.txt"))
+        self.cookies = MyCookieJar(
+            filename=os.path.join(str(Path.home()), ".gs_cookies.txt")
+        )
         self.queue = Queue()
         self.process = Queue()
 
@@ -25,7 +34,9 @@ class Session:
             self.logout()
         try:
             self.cookies.load()
-            response = requests.get(options.host + "/logged_in_api/", cookies=self.cookies).text
+            response = requests.get(
+                options.host + LOGGED_IN_URL, cookies=self.cookies
+            ).text
             if json.loads(response)["logged_in"]:
                 print_info("[session] cookies found.")
             else:
@@ -44,31 +55,43 @@ class Session:
         """
         print_info("[login] Opening session...")
         session = requests.Session()  # Make a session.
-        session.cookies = MyCookieJar(os.path.join(str(Path.home()), ".gs_cookies.txt"))  # set the cookie.
+        session.cookies = MyCookieJar(
+            os.path.join(str(Path.home()), ".gs_cookies.txt")
+        )  # set the cookie.
         print_info("[login] Get login page")
         # Perform a GET request to obtain the CSRF token
         response = session.get(HOST_URL + LOGIN_URL)
-        print(response.cookies)
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
             username = input("Username: ")
             psw = getpass()
-            login_data = dict(username=username, password=psw, csrfmiddlewaretoken=csrftoken, next="/")
+            login_data = dict(
+                username=username, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
+            )
             response = session.post(
-                self.options.host + "/login/", data=login_data, headers=dict(Referer=self.options.host + "/login/")
+                self.options.host + LOGIN_URL,
+                data=login_data,
+                headers=dict(Referer=self.options.host + LOGIN_URL),
             )
             # try to log in.
             if response.status_code != 200:
                 print_warning(response.text)
                 continue
             login_data = dict(
-                token=input("Token: "), password=psw, username=username, csrfmiddlewaretoken=csrftoken, next="/"
+                token=input("Token: "),
+                password=psw,
+                username=username,
+                csrfmiddlewaretoken=csrftoken,
+                next="/",
             )
             response = session.post(
                 self.options.host + TWO_FACTOR_AUTH_URL,
                 data=login_data,
-                headers={"Referer": self.options.host + LOGIN_URL, "User-Agent": "gsport " + GSPORT_VERSION},
+                headers={
+                    "Referer": self.options.host + LOGIN_URL,
+                    "User-Agent": "gsport " + GSPORT_VERSION,
+                },
                 verify=False,
             )
             if response.status_code != 200:
@@ -90,25 +113,21 @@ class Session:
         :param fname: The filename.
         :return: None
         """
-        print("The url is " + url)
-        print("The name is " + fname)
-        print("THe size is " + str(fsize))
         try:
             dsize = 0
             start = time.time()
 
-            with requests.get(url, stream=True, cookies=self.cookies) as r:  # Start the download.
+            with requests.get(
+                url, stream=True, cookies=self.cookies
+            ) as r:  # Start the download.
                 self.options.dir = "/".join(self.options.dir.split("/")[:-1])
 
                 if self.options.dir == "":
-                    self.options.dir = "."
+                    self.options.dir = ""
                 with open(fname, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
-
-                            print("chunk ")
-                            print(chunk)
 
                             dsize += len(chunk)
                             rate = dsize // (time.time() - start)
@@ -136,7 +155,9 @@ class Session:
     def logout(self) -> None:
         try:
             self.cookies.load()
-            response = requests.get(self.options.host + LOGOUT_URL, cookies=self.cookies)
+            response = requests.get(
+                self.options.host + LOGOUT_URL, cookies=self.cookies
+            )
             if response.status_code == 200:
                 print_info("[logout] Logged out.")
             else:

@@ -1,8 +1,8 @@
 import argparse
 import os
 
-from helpers import print_functions
-from variables import (
+from src.helpers import print_functions
+from src.variables import (
     DOWNLOAD_ALL_EXAMPLE_MESSAGE,
     DOWNLOAD_EXAMPLE_MESSAGE,
     GSPORT_VERSION,
@@ -27,8 +27,18 @@ class Options:
         )
 
         # Parser commands.
-        parser.add_argument("-H", "--host", default=HOST_URL, help="The host site default is %(default)s")
-        parser.add_argument("-c", "--clear-cookies", action="store_true", help="clear cookies and logout session")
+        parser.add_argument(
+            "-H",
+            "--host",
+            default=HOST_URL,
+            help="The host site default is %(default)s",
+        )
+        parser.add_argument(
+            "-c",
+            "--clear-cookies",
+            action="store_true",
+            help="clear cookies and logout session",
+        )
         parser.add_argument(
             "-v",
             "--version",
@@ -37,12 +47,17 @@ class Options:
             version=f"%(prog)s {GSPORT_VERSION}",
         )
         parser.add_argument(
-            "-p", "--projects", help="show all the projects that a user has access to", action="store_true"
+            "-p",
+            "--projects",
+            help="show all the projects that a user has access to",
+            action="store_true",
         )
 
         # List of shared commands for subcommands.
         project_parser = argparse.ArgumentParser(add_help=False)
-        project_parser.add_argument("PROJECT", help="[projectcode] for specific projects")
+        project_parser.add_argument(
+            "PROJECT", help="[projectcode] for specific projects"
+        )
         download_and_listing_shared = argparse.ArgumentParser(add_help=False)
         download_and_listing_shared.add_argument(
             "-d",
@@ -70,12 +85,15 @@ class Options:
             parents=[project_parser, download_and_listing_shared],
         )
         list_options_group = subparser_list.add_mutually_exclusive_group()
-        list_options_group.add_argument("-m", "--dirs", action="store_true", help="show directories")
+        list_options_group.add_argument(
+            "-m", "--dirs", action="store_true", help="show directories"
+        )
         list_options_group.add_argument(
             "-r",
             "--recursive",
             action="store_true",
-            help="recursive complete tree from --cd " "[dir] or everything if no --cd option is given ",
+            help="recursive complete tree from --cd "
+            "[dir] or everything if no --cd option is given ",
         )
         subparser_list.set_defaults(func=self.L)
 
@@ -87,7 +105,9 @@ class Options:
             epilog=DOWNLOAD_EXAMPLE_MESSAGE,
             parents=[project_parser, downloads_shared],
         )
-        subparser_download.add_argument("FILE", help="files to download seperated by spaces", nargs="+")
+        subparser_download.add_argument(
+            "FILE", help="files to download seperated by spaces", nargs="+"
+        )
         subparser_download.set_defaults(func=self.D)
 
         # Download all subcommand.
@@ -99,28 +119,39 @@ class Options:
             epilog=DOWNLOAD_ALL_EXAMPLE_MESSAGE,
             parents=[project_parser, download_and_listing_shared, downloads_shared],
         )
-        subparser_download_all.add_argument("-t", "--threads", type=int, default=os.cpu_count())
+        subparser_download_all.add_argument(
+            "-t", "--threads", type=int, default=os.cpu_count()
+        )
         subparser_download_all.add_argument(
             "-r",
             "--recursive",
             action="store_true",
-            help="recursive complete tree from --cd " "[dir] or everything if no --cd option is given ",
+            help="recursive complete tree from --cd "
+            "[dir] or everything if no --cd option is given ",
         )
         subparser_download_all.set_defaults(func=self.A)
 
         # Parse arguments.
         args = parser.parse_args()
 
-        self.host: str = args.host  # The host site that gsport should make connection to.
+        self.host: str = (
+            args.host
+        )  # The host site that gsport should make connection to.
         self.download: list | None = None  # When the download option is being used the files are saved in a list.
         self.download_all: bool = False  # Is the all option being used.
         self.listing: bool = False  # Is the list option being used.
         self.recursive: bool = False  # Is the recursive option being used.
-        self.project: str | None = None  # The projectcode that the user requests things from.
-        self.clear_cookies: bool = args.clear_cookies  # Clear the cookies, must be logged in to clear cookies.
-        self.threads: int = 1  # The amount of threads being used for multithreading, Linux only.
+        self.project: str | None = (
+            None  # The projectcode that the user requests things from.
+        )
+        self.clear_cookies: bool = (
+            args.clear_cookies
+        )  # Clear the cookies, must be logged in to clear cookies.
+        self.threads: int = (
+            1  # The amount of threads being used for multithreading, Linux only.
+        )
         self.folder_mode: bool = False  # Show only directories in list sub-command.
-        self.dir: str = "."
+        self.dir: str = ""
         self.get_projects: bool = args.projects  # Show all user projects?
         self.output: str = "."  # The directory that the files are being saved to.
 

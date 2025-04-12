@@ -6,3 +6,4 @@
 .idea/
 /GUI/
 **/__pycache__/
+build/

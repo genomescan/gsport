@@ -4,7 +4,7 @@ import os
 import requests
 from terminalcolorpy import colored
 
-from variables import ALL_PROJECTS_API
+from src.variables import ALL_PROJECTS_API, DOWNLOAD_RECURSIVE
 
 from .print_functions import print_error, print_info, print_rec
 
@@ -17,7 +17,7 @@ def get_listing(session) -> None:
     :return: None
     """
     response = requests.get(
-        session.options.host + "/data_api_recursive/" + session.options.project,
+        session.options.host + DOWNLOAD_RECURSIVE + session.options.project,
         cookies=session.cookies,
         params={"cd": session.options.dir},
     )
@@ -55,7 +55,9 @@ def list_all_projects(session) -> None:
     :return:
     """
     print_info("[requesting projects]")
-    response = requests.get(session.options.host + ALL_PROJECTS_API, cookies=session.cookies, verify=False)
+    response = requests.get(
+        session.options.host + ALL_PROJECTS_API, cookies=session.cookies, verify=False
+    )
     try:
         projects = response.json()
         for i in projects["response"]:

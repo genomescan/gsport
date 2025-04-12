@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from src.variables import DOWNLOAD_FILE_URL, DOWNLOAD_RECURSIVE
+
 from .listings import get_list
 from .print_functions import print_error, print_warning
 from .url import get_url
@@ -16,7 +18,7 @@ def download(session) -> None:
     datafiles = ""
     if session.options.download:
         response = requests.get(
-            session.options.host + "/data_api2/" + session.options.project + "/n",
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/n",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
@@ -25,20 +27,18 @@ def download(session) -> None:
         datafiles = datafiles["children"]
     elif session.options.download_all and session.options.recursive:
         response = requests.get(
-            session.options.host + "/data_api_recursive/" + session.options.project,
+            session.options.host + DOWNLOAD_RECURSIVE + session.options.project,
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
         datafiles = get_list(response.text, session.options.dir)
     elif session.options.download_all:
         response = requests.get(
-            session.options.host + "/data_api2/" + session.options.project + "/n",
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/n",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
         datafiles = response.json()
-        print(datafiles)
-
     else:
         exit(1)
 
@@ -57,14 +57,18 @@ def download(session) -> None:
                 )
             if input("Continuing on with download of valid files? (y/n)") != "y":
                 exit(1)
-    if not os.path.isdir(session.options.output):  # Create the output folder if it doesn't exist.
+    if not os.path.isdir(
+        session.options.output
+    ):  # Create the output folder if it doesn't exist.
         os.makedirs(session.options.output)
     if session.options.download_all and session.options.recursive:
         make_directories(datafiles, output=session.options.output)
     get_url(session, datafiles)
 
 
-def make_directories(files: list[dict[str, str | int]], directory_path_length: int = 0, output: str = ".") -> None:
+def make_directories(
+    files: list[dict[str, str | int]], directory_path_length: int = 0, output: str = "."
+) -> None:
     """
         Create the directories that the files will be put in.
     :param files: The list of dictionaries containing file information.
@@ -77,7 +81,9 @@ def make_directories(files: list[dict[str, str | int]], directory_path_length: i
         for path in file["name"].split("/")[
             directory_path_length:-1
         ]:  # Loop through the elements of the path, but not the file. This works because the server should never return "\" based paths.
-            total_path = os.path.join(total_path, path)  # Append the path element to the total path.
+            total_path = os.path.join(
+                total_path, path
+            )  # Append the path element to the total path.
             if not os.path.isdir(
                 total_path
             ):  # Create the directory with the using the total path if it doesn't exist yet.

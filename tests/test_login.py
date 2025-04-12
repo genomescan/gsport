@@ -3,8 +3,8 @@ from unittest.mock import patch
 
 import requests_mock
 
-from classes import Session
 from main import main
+from src.classes import Session
 
 """
 Tests for the login process
@@ -22,7 +22,11 @@ class TestLogin(unittest.TestCase):
         """
 
         with requests_mock.Mocker() as m:
-            m.get("https://portal.genomescan.nl//logged_in_api/", text='{"logged_in": false}', status_code=200)
+            m.get(
+                "https://portal.genomescan.nl//logged_in_api/",
+                text='{"logged_in": false}',
+                status_code=200,
+            )
 
             main()
 
