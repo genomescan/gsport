@@ -1,6 +1,6 @@
 import unittest
 
-from src.helpers import human_readable_eta
+from src.helpers.eta_readable import human_readable_eta
 
 """
 Tests for the converter to human readable time

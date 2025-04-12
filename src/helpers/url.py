@@ -46,6 +46,7 @@ def get_url(session, datafiles: list[dict[str, str | int]]) -> None:
             + "/"
             + response.text
         )
+        print(url)
         dl_list.append([url, fsize, fname])
 
     download_parallel(session, dl_list, dl_sum)
