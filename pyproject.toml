@@ -11,14 +11,17 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.7"
-license = {text = "MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
 ]
 dependencies = [
     "requests",
+    "certifi",
+    "chardet",
+    "idna",
+    "urllib3",
+    "terminalcolorpy",
+    "requests-mock"
 ]
 
 [project.scripts]
