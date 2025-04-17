@@ -42,7 +42,7 @@ def get_listing(session) -> None:
                             colored(text=str(file["size"]), color="red"),
                         )
                     else:
-                        print(file["name"] + " Size:  " + str(file["size"]) )
+                        print(file["name"] + " Size:  " + str(file["size"]))
         else:
             for file in datafiles["children"]:
                 if len(file["name"]) > 0:

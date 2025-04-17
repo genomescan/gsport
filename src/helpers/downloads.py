@@ -1,4 +1,5 @@
 import os
+from typing import Dict, List, Union
 
 import requests
 
@@ -7,8 +8,6 @@ from src.variables import DOWNLOAD_FILE_URL, DOWNLOAD_RECURSIVE
 from .listings import get_list
 from .print_functions import print_error, print_warning
 from .url import get_url
-
-from typing import List, Dict, Union
 
 
 def download(session) -> None:
@@ -69,7 +68,9 @@ def download(session) -> None:
 
 
 def make_directories(
-    files: List[Dict[str,Union[str, int]]], directory_path_length: int = 0, output: str = "."
+    files: List[Dict[str, Union[str, int]]],
+    directory_path_length: int = 0,
+    output: str = ".",
 ) -> None:
     """
         Create the directories that the files will be put in.

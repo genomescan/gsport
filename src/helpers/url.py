@@ -1,11 +1,12 @@
 import os
+from typing import Dict, List, Union
 
 import requests
 
 from src.variables import VERIFY_FILES_URL
 
 from .parallel_download import download_parallel
-from typing import List, Dict, Union
+
 
 def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
     """

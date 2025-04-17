@@ -1,10 +1,11 @@
 import time
 from multiprocessing import Process
+from typing import List
 
 from src.helpers.eta_readable import human_readable_eta
 from src.helpers.print_functions import print_info
 from src.helpers.sizeofmetric import size_of_metric_fmt
-from typing import List
+
 
 def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
     """

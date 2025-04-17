@@ -1,6 +1,6 @@
-from terminalcolorpy import colored, printcolor
 import sys
 
+from terminalcolorpy import colored, printcolor
 
 
 def print_error(text: str) -> None:
@@ -17,13 +17,11 @@ def print_info(text: str) -> None:
         print(text)
 
 
-
 def print_warning(text: str) -> None:
     if sys.version_info >= (3, 10, 0):
         printcolor({"text": text, "color": "yellow"})
     else:
         print(text)
-
 
 
 def print_rec(dic, depth: int) -> None:
