@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import requests
 from terminalcolorpy import colored
@@ -34,18 +35,27 @@ def get_listing(session) -> None:
         if not session.options.folder_mode:
             for file in datafiles["children"]:
                 if file["type"] == "file":
-                    print(
-                        colored(text=file["name"], color="yellow"),
-                        "Size: ",
-                        colored(text=str(file["size"]), color="red"),
-                    )
+                    if sys.version_info >= (3, 10, 0):
+                        print(
+                            colored(text=file["name"], color="yellow"),
+                            "Size: ",
+                            colored(text=str(file["size"]), color="red"),
+                        )
+                    else:
+                        print(file["name"] + " Size:  " + str(file["size"]) )
         else:
             for file in datafiles["children"]:
                 if len(file["name"]) > 0:
                     if file["type"] == "directory":
-                        print(colored(text=file["name"], color="cyan"))
+                        if sys.version_info >= (3, 10, 0):
+                            print(colored(text=file["name"], color="cyan"))
+                        else:
+                            print(file["name"])
                     else:
-                        print(colored(text=file["name"], color="yellow"))
+                        if sys.version_info >= (3, 10, 0):
+                            print(colored(text=file["name"], color="yellow"))
+                        else:
+                            print(file["name"])
 
 
 def list_all_projects(session) -> None:

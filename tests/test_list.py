@@ -117,7 +117,10 @@ class TestListcommand(unittest.TestCase):
                     "[session] cookies found.\ntest_10G.txt Size:  10737418240\ntest2_10G.txt Size:  10737418240\n"
                 )
 
-                assert self.remove_ansi_escape_sequences(captured) == expected_output
+                print("TEST FILES")
+                print(captured)
+
+                assert captured == expected_output
 
     @patch("sys.argv", ["script_name", "list", "999", "-m", "-d", "test_999"])
     @patch("http.cookiejar.MozillaCookieJar.load")

@@ -1,16 +1,29 @@
 from terminalcolorpy import colored, printcolor
+import sys
+
 
 
 def print_error(text: str) -> None:
-    printcolor({"text": text, "color": "red"})
+    if sys.version_info >= (3, 10, 0):
+        printcolor({"text": text, "color": "red"})
+    else:
+        print(text)
 
 
 def print_info(text: str) -> None:
-    printcolor({"text": text, "color": "cyan"})
+    if sys.version_info >= (3, 10, 0):
+        printcolor({"text": text, "color": "cyan"})
+    else:
+        print(text)
+
 
 
 def print_warning(text: str) -> None:
-    printcolor({"text": text, "color": "yellow"})
+    if sys.version_info >= (3, 10, 0):
+        printcolor({"text": text, "color": "yellow"})
+    else:
+        print(text)
+
 
 
 def print_rec(dic, depth: int) -> None:
@@ -24,14 +37,23 @@ def print_rec(dic, depth: int) -> None:
         if item["type"] == "directory":
             for i in range(depth * 2):
                 print("  ", end="")
-            print("└──", colored(text=item["name"], color="cyan"))
+            if sys.version_info >= (3, 10, 0):
+                print("└──", colored(text=item["name"], color="cyan"))
+            else:
+                print("└── " + item["name"])
             print_rec(item["children"], depth + 1)
         else:
             for i in range(depth * 2):
                 print("  ", end="")
-            print(
-                "├──",
-                colored(text=item["name"], color="yellow"),
-                "Size: ",
-                colored(text=str(item["size"]), color="red"),
-            )
+
+            if sys.version_info >= (3, 10, 0):
+                print(
+                    "├──",
+                    colored(text=item["name"], color="yellow"),
+                    "Size: ",
+                    colored(text=str(item["size"]), color="red"),
+                )
+            else:
+                print(
+                    "├── " + item["name"] + " Size:  " + str(item["size"]),
+                )

@@ -4,9 +4,9 @@ from multiprocessing import Process
 from src.helpers.eta_readable import human_readable_eta
 from src.helpers.print_functions import print_info
 from src.helpers.sizeofmetric import size_of_metric_fmt
+from typing import List
 
-
-def download_parallel(session, dl_list: list[list], dl_sum: int) -> None:
+def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
     """
         Multithreading of download. It starts by making a process of every download by setting the target to
         session.download_file with the parameters of the file. It will then start the processes until the capacity is reached,

@@ -5,9 +5,9 @@ import requests
 from src.variables import VERIFY_FILES_URL
 
 from .parallel_download import download_parallel
+from typing import List, Dict, Union
 
-
-def get_url(session, datafiles: list[dict[str, str | int]]) -> None:
+def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
     """
         Generate the url of every file to be downloaded and puts them in a list. Call the multithreading download function
         if the os is Linux, otherwise call the download function for each file to be downloaded.
