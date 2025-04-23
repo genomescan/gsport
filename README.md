@@ -1,107 +1,81 @@
-
 # GSport
 
-GSport is a command-line program designed to accelerate file downloads from the customer portal by the use of many processes . This significantly improves download speeds and efficiency, making the process faster.
-
-## Improvements
-
--   Multithreading is now supported on Windows
+GSport is a command-line tool designed to accelerate file downloads from the GenomeScan Customer Portal. It leverages multiprocessing to significantly improve download speeds and efficiency.
 
 ## Prerequisites
 
-Ensure you have the following installed on your system before proceeding:
+Ensure you have the following installed:
+- Python 3.x
+- Pip (Python package manager)
+- python-venv (Linux/ macOS) or virtualenv(windows)
 
--   Python 3.x
-    
--   Pip (Python package manager)
-    
+## Installation
 
-## Installation and Setup
+### Linux/macOS
 
-### Debian/Ubuntu (Linux/macOS)
-
-1.  Install virtual environment support:
-    
-    ```
-    sudo apt install python-venv
-    ```
-    
-2.  Clone the repository and navigate into the project directory:
-    
-    ```
-    cd gsport
-    ```
-    
-3.  Create a virtual environment:
-    
-    ```
-    python3 -m venv env
-    ```
-    
-4.  Activate the virtual environment:
-    
-    ```
-    source env/bin/activate
-    ```
-    
-5.  Install dependencies:
-    
-    ```
-    pip install -r requirements.txt
-    ```
-    
-6.  Run GSport:
-    
-    ```
-    python gsport.py [options]
-    ```
-    
+```bash
+git clone https://github.com/genomescan/gsport.git
+cd gsport
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
 
 ### Windows
 
-1.  Install virtual environment support:
-    
-    ```
-    pip install virtualenv
-    ```
-    
-2.  Navigate into the project directory:
-    
-    ```
-    cd gsport
-    ```
-    
-3.  Create a virtual environment:
-    
-    ```
-    virtualenv env
-    ```
-    
-4.  Activate the virtual environment:
-    
-    ```
-    env\Scripts\activate.bat
-    ```
-    
-5.  Install dependencies:
-    
-    ```
-    pip install -r requirements.txt
-    ```
-    
-6.  Run GSport:
-    
-    ```
-    python gsport.py [options]
-    ```
-    
+```bash
+git clone https://github.com/genomescan/gsport.git
+cd gsport
+virtualenv env
+env\Scripts\activate.bat
+pip install -r requirements.txt
+```
 
 ## Usage
 
-Run the application with the appropriate options:
+To see all available options, run:
 
-```
+```bash
 python gsport.py --help
 ```
 
-This command will display a list of available options and usage instructions.
+This will print a full list of available options and flags.
+
+### List Files
+
+```bash
+gsport list 100000
+gsport list 100000 -m
+gsport list 100000 -d directory
+gsport list 100000 -m -d directory
+gsport list 100000 -r
+gsport list 100000 -r -d directory
+```
+
+### Download All Files
+
+```bash
+gsport all 100000
+gsport all 100000 -d directory
+gsport all 100000 -r
+gsport all 100000 -r -d directory
+gsport all 100000 -o outputdir
+```
+
+### Download Specific Files
+
+```bash
+gsport download 100000 path/to/file1.txt path/to/file2.txt
+gsport download 100000 path/to/file.txt -o outputdir
+```
+
+### Advanced Examples
+
+```bash
+gsport -p 100000 -l                        # List all files in the project
+gsport -p 100000 -ls                       # List files with size
+gsport -p 100000 -l --dirs                 # List only folders/directories
+gsport -p 100000 -l --cd Analysis          # List files under "Analysis"
+gsport -p 100000 -l -r                     # List all in a recursive tree
+gsport -p 100000 -l --dirs --cd Analysis   # List folders under Analysis
+```
