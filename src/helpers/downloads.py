@@ -23,8 +23,13 @@ def download(session) -> None:
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = response.json()
+        datafiles = response
+        print(datafiles)
+        print(
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/y",
+        )
 
+        print(session.options.dir)
         datafiles = datafiles["children"]
     elif session.options.download_all and session.options.recursive:
         response = requests.get(
