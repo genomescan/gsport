@@ -146,8 +146,8 @@ class Session:
                                 )
                             else:
                                 self.queue.put([len(chunk), False])
-            if self.options.download_all:
-                self.queue.put([0, True])
+
+            self.queue.put([0, True])
         except KeyboardInterrupt:
             return
         return

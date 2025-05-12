@@ -50,8 +50,12 @@ def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
         if (
             current_processes_amount < max_processes
             and current_process_index < number_of_processes
-        ):  # Make sure we are at capacity.
+        ):
             continue
+
+        if finished_processes_amount == number_of_processes:
+            print_info("\nDownloading complete")
+            break
 
         status = session.queue.get()
         downloaded_bytes += status[0]
@@ -83,6 +87,7 @@ def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
                 estimated_time_of_arrival,
                 end="     ",
             )
+
         if finished_processes_amount == number_of_processes:
             print_info("\nDownloading complete")
             break
