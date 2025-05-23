@@ -3,11 +3,17 @@ from typing import Dict, List, Union
 
 import requests
 
+from src.helpers.listings import get_list
+from src.helpers.print_functions import print_error, print_file, print_warning
+from src.helpers.url import get_url
 from src.variables import DOWNLOAD_FILE_URL, DOWNLOAD_RECURSIVE
 
-from .listings import get_list
-from .print_functions import print_error, print_warning
-from .url import get_url
+
+def _get_file_names(files: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
+    file_names = {}
+    for file in files:
+        file_names[file["name"]] = file
+    return file_names
 
 
 def download(session) -> None:
@@ -16,7 +22,7 @@ def download(session) -> None:
     :param session: The session object.
     :return: None
     """
-    datafiles = ""
+    datafiles = []
     if session.options.download:
         response = requests.get(
             session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/n",
@@ -24,8 +30,6 @@ def download(session) -> None:
             params={"cd": session.options.dir},
         )
         datafiles = response.json()
-
-        datafiles = datafiles["children"]
     elif session.options.download_all and session.options.recursive:
         response = requests.get(
             session.options.host + DOWNLOAD_RECURSIVE + session.options.project,
@@ -48,16 +52,25 @@ def download(session) -> None:
         exit(1)
 
     if session.options.download:
-        if len(datafiles) < len(session.options.download):
-            requested = set(session.options.download)
-            allowed = {i["name"] for i in datafiles}
-            not_allowed = requested - allowed
-            for i in not_allowed:
+        requested = session.options.download
+        allowed = _get_file_names(datafiles)
+
+        datafiles = []
+        for file in requested:
+            if file not in allowed:
                 print_warning(
-                    f"WARNING: {i} is not a valid file for download, make sure the path is spelled correctly."
+                    f"WARNING: {file} is not a valid file for download, make sure the path is spelled correctly."
                 )
-            if input("Continuing on with download of valid files? (y/n)") != "y":
-                exit(1)
+                continue
+            if file in allowed:
+                print_file(file)
+                datafiles.append(allowed[file])
+        if not len(datafiles) > 0:
+            print("No valid files to download")
+            exit(1)
+        if input("Continuing on with the download of the existing files? (y/n)") != "y":
+            exit(1)
+
     if not os.path.isdir(
         session.options.output
     ):  # Create the output folder if it doesn't exist.

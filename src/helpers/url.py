@@ -3,9 +3,8 @@ from typing import Dict, List, Union
 
 import requests
 
+from src.helpers.parallel_download import download_parallel
 from src.variables import VERIFY_FILES_URL
-
-from .parallel_download import download_parallel
 
 
 def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
@@ -47,7 +46,6 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
             + "/"
             + response.text
         )
-        print(url)
         dl_list.append([url, fsize, fname])
 
     download_parallel(session, dl_list, dl_sum)

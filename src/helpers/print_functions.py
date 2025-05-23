@@ -24,6 +24,13 @@ def print_warning(text: str) -> None:
         print(text)
 
 
+def print_file(text: str) -> None:
+    if sys.version_info >= (3, 10, 0):
+        printcolor({"text": text, "color": "green"})
+    else:
+        print(text)
+
+
 def print_rec(dic, depth: int) -> None:
     """
         Prints the folder structure as returned from the api.

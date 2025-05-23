@@ -5,9 +5,8 @@ import sys
 import requests
 from terminalcolorpy import colored
 
+from src.helpers.print_functions import print_error, print_info, print_rec
 from src.variables import ALL_PROJECTS_API, DOWNLOAD_RECURSIVE
-
-from .print_functions import print_error, print_info, print_rec
 
 
 def get_listing(session) -> None:
