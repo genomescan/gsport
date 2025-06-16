@@ -5,7 +5,7 @@ GSport is a command-line tool designed to accelerate file downloads from the Gen
 ## Prerequisites
 
 Ensure you have the following installed:
-- Python 3.x
+- Python 3.7.X
 - Pip (Python package manager)
 - python-venv (Linux/ macOS) or virtualenv(windows)
 
