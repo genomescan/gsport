@@ -65,7 +65,7 @@ def list_all_projects(session) -> None:
     """
     print_info("[requesting projects]")
     response = requests.get(
-        session.options.host + ALL_PROJECTS_API, cookies=session.cookies, verify=False
+        session.options.host + ALL_PROJECTS_API, cookies=session.cookies
     )
     try:
         projects = response.json()

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["build", "setuptools>=42", "wheel>=0.36.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,14 +15,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "requests",
-    "certifi",
-    "chardet",
-    "idna",
-    "urllib3",
-    "terminalcolorpy",
-    "requests-mock"
+  "requests",
+  "requests-mock>=1.12.1",
+  "terminalcolorpy"
 ]
+
 
 [project.scripts]
 gsport = "main:main"

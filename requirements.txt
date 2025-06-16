@@ -1,7 +1,4 @@
-certifi==2022.12.7
-chardet==3.0.4
-idna==2.8
 requests==2.28.2
-urllib3==1.26.5
+wheel>=0.36.2
+requests-mock
 terminalcolorpy
-requests-mock~=1.12.1
