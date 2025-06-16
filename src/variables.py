@@ -29,6 +29,6 @@ example usage:
 """
 DOWNLOAD_EXAMPLE_MESSAGE = """
 example usage:
-  gsport download 100000 100000/testdir/test.txt 100000/testdir2/test2.txt     downloads the specific files
-  gsport download 100000 100000/testdir/test.txt -o outputdir                  downloads the specific files and outputs them in a directory called outputdir
+  gsport download 100000 test.txt test2.txt                     downloads the specific files, they have to be in the root directory
+  gsport download 100000 test.txt -o outputdir                  downloads the specific files and outputs them in a directory called outputdir
 """
