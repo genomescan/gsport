@@ -15,7 +15,7 @@ example usage:
   gsport list 100000                     shows all the files associated with the project from the top level but not any directory or files within directories
   gsport list 100000 -m                  shows all the folders/directories under that project but not their content
   gsport list 100000 -d directory        shows all the files under a directory for that project, no subfolder or files in there
-  gsport list 100000 -m -d directory     shows all the folders under a directory for that project but not their content
+  gsport list 100000 -m -d directory     shows all the files and folders under a directory for that project but not the content of the folders
   gsport list 100000 -r                  shows all the files and folders in a tree like structure
   gsport list 100000 -r -d directory     shows all the files and folders in a tree like structure under a directory for that project
 """
