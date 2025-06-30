@@ -15,9 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-  "requests",
-  "requests-mock>=1.12.1",
-  "terminalcolorpy"
+    "requests==2.32.4",
+    "requests-mock>=1.8.1.dev22",
+    "terminalcolorpy"
 ]
 
 
