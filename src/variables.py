@@ -25,7 +25,7 @@ example usage:
   gsport all 100000 -d directory       downloads only the files directly under a directory, no subfolder or files in there
   gsport all 100000 -r                 downloads all the files and folders for that project
   gsport all 100000 -r -d directory    downloads all the files and folders under a directory for that project
-  gsport all 100000 -o outputdir       downloads al the files associated with the project from the top level but not any files within directories and outputs them in a directory called outputdir
+  gsport all 100000 -o outputdir       downloads all the files associated with the project from the top level but not any files within directories and outputs them in a directory called outputdir
 """
 DOWNLOAD_EXAMPLE_MESSAGE = """
 example usage:
