@@ -1,6 +1,8 @@
 # GSport
 
-GSport is a command-line tool designed to accelerate file downloads from the GenomeScan Customer Portal. It leverages multiprocessing to significantly improve download speeds and efficiency.
+GSport is a command-line tool designed to accelerate file downloads from the GenomeScan Customer Portal. It leverages multiprocessing to significantly improve download speeds and efficiency. Works on linux, windows and macOS. 
+
+WARNING: This is version 2.0, some of the command line interface has changed partially in preparation for version 3.0 that will be released (hopefully end of 2025) when we start using our new customer portal. Verion 1.x should still be usable during version 2.0, but when version 3.0 is introduced both version 1 and 2 will no longer work.
 
 ## Prerequisites
 
@@ -11,7 +13,17 @@ Ensure you have the following installed:
 
 ## Installation
 
-### Linux/macOS
+There are 2 options for installing GSport.
+- Pip install
+- Manual installation
+
+### Pip install
+```bash
+pip install gsport
+```
+
+### Manual install
+#### Linux/macOS
 
 ```bash
 git clone https://github.com/genomescan/gsport.git
@@ -21,7 +33,7 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-### Windows
+#### Windows
 
 ```bash
 git clone https://github.com/genomescan/gsport.git
