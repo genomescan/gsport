@@ -1,6 +1,7 @@
 import sys
 
-from terminalcolorpy import colored, printcolor
+if sys.version_info >= (3, 10, 0):
+    from terminalcolorpy import colored, printcolor
 
 
 def print_error(text: str) -> None:

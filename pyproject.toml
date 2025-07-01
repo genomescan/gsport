@@ -4,25 +4,34 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gsport"
-version = "2.0"
+version = "2.0.0"
 description = "Download manager for genomscan portal"
 authors = [
-    {name = "g.vela", email = "g.vela@genomescan.nl"}
+    {name = "b.vanwersch", email = "b.vanwersch@genomescan.nl"},
+    {name = "g.vela", email = "gonzalov2000@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
+license-files = ["LICENSE"]
+
 dependencies = [
     "requests==2.32.4",
-    "requests-mock>=1.8.1.dev22",
-    "terminalcolorpy"
+    "terminalcolorpy; python_version >= '3.10'"
 ]
 
+[project.urls]
+Homepage = "https://github.com/genomescan/gsport"
+Issues = "https://github.com/genomescan/gsport/issues"
 
 [project.scripts]
 gsport = "main:main"
 
 [tool.setuptools]
-packages = [ "tests", "src.classes", "src.helpers"]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["src*", "main.py"]
+exclude = ["tests*"]

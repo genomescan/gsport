@@ -92,7 +92,6 @@ class Session:
                     "Referer": self.options.host + LOGIN_URL,
                     "User-Agent": "gsport " + GSPORT_VERSION,
                 },
-                verify=False,
             )
             if response.status_code != 200:
                 print_error(response.text)

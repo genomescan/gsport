@@ -3,7 +3,9 @@ import os
 import sys
 
 import requests
-from terminalcolorpy import colored
+
+if sys.version_info >= (3, 10, 0):
+    from terminalcolorpy import colored
 
 from src.helpers.print_functions import print_error, print_info, print_rec
 from src.variables import ALL_PROJECTS_API, DOWNLOAD_RECURSIVE
