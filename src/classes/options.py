@@ -168,7 +168,7 @@ class Options:
         :return: None
         """
         self.folder_mode = args.dirs
-        self.dir = os.path.join(args.cd, "")
+        self.dir = args.cd + "/"
         self.recursive = args.recursive
         self.project = args.PROJECT
         self.listing = True
@@ -179,7 +179,7 @@ class Options:
         :param args: The argument Namespace object.
         :return: None
         """
-        self.dir = os.path.join(args.cd, "")
+        self.dir = args.cd + "/"
         self.recursive = args.recursive
         self.threads = args.threads
         self.project = args.PROJECT

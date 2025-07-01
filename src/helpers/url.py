@@ -34,6 +34,7 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
             + file["name"]
         )
         dl_sum += fsize
+        filename = filename.replace("\\", "/")
         response = requests.get(
             session.options.host + VERIFY_FILES_URL,
             cookies=session.cookies,
