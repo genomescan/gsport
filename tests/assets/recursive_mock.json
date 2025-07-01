@@ -1,0 +1,32 @@
+{
+  "name": "999",
+  "type": "directory",
+  "children": [
+    {
+      "name": "test_map_salah",
+      "type": "directory",
+      "children": [
+        {
+          "name": "3660_Color_palette (1).pdf",
+          "type": "file",
+          "size": 517854
+        }]
+    },
+    {
+      "name": "test_999",
+      "type": "directory",
+      "children": [
+        {
+          "name": "test_10G.txt",
+          "type": "file",
+          "size": 10737418240
+        },
+        {
+          "name": "test2_10G.txt",
+          "type": "file",
+          "size": 10737418240
+        }
+      ]
+    }
+  ]
+}

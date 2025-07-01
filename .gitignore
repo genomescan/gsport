@@ -1,0 +1,9 @@
+/gsport.egg-info/
+/venv/
+.idea/
+/gsport.egg-info/
+/venv/
+.idea/
+/GUI/
+**/__pycache__/
+build/
