@@ -7,7 +7,7 @@ WARNING: This is version 2.0, some of the command line interface has changed par
 ## Prerequisites
 
 Ensure you have the following installed:
-- Python 3.7.X
+- Python 3.8.X
 - Pip (Python package manager)
 - python-venv (Linux/ macOS) or virtualenv(windows)
 

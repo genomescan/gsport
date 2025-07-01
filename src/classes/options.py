@@ -17,7 +17,6 @@ class Options:
         parser = argparse.ArgumentParser(
             prog="gsport",
             description="GSPORT command-line tool for accessing GenomeScans new Customer Portal",
-            epilog="For the new customer portal only.",
         )
         subparsers = parser.add_subparsers(
             title="subcommands",

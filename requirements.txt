@@ -1,4 +1,4 @@
 requests==2.32.4
 wheel>=0.36.2
-requests-mock
-terminalcolorpy
+requests-mock>=1.8.1.dev22
+terminalcolorpy; python_version >= '3.10'
