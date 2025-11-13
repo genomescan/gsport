@@ -28,25 +28,12 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
             else os.path.join(session.options.output, os.path.normpath(file["name"]))
         )
         filename = (
-            "/"
-            + (session.options.dir if not session.options.recursive else "")
-            + "/"
-            + file["name"]
+            file["name"]
         )
         dl_sum += fsize
         filename = filename.replace("\\", "/")
-        response = requests.get(
-            session.options.host + VERIFY_FILES_URL,
-            cookies=session.cookies,
-            params={"project": session.options.project, "filename": filename},
-        )
-        url = (
-            session.options.host
-            + "/session_files2/"
-            + session.options.project
-            + "/"
-            + response.text
-        )
-        dl_list.append([url, fsize, fname])
+        url = (session.options.host + VERIFY_FILES_URL + session.options.project)
+        params={"project": session.options.project, "file": filename}
+        dl_list.append([url, params,fsize, fname])
 
     download_parallel(session, dl_list, dl_sum)

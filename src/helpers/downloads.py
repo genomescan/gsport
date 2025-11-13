@@ -1,5 +1,6 @@
 import os
 from typing import Dict, List, Union
+import json
 
 import requests
 
@@ -29,21 +30,22 @@ def download(session) -> None:
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = response.json()
+        datafiles = response.json()["data"]
     elif session.options.download_all and session.options.recursive:
         response = requests.get(
-            session.options.host + DOWNLOAD_RECURSIVE + session.options.project,
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = get_list(response.text, session.options.dir)
+        print(response.text)
+        datafiles = get_list(response.json(), session.options.dir)
     elif session.options.download_all:
         response = requests.get(
-            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/n",
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/dirs",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = response.json()
+        datafiles = response.json()["data"]
     else:
         exit(1)
 

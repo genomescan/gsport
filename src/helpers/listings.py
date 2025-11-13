@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from typing import Dict
+import json
 
 import requests
 
@@ -83,7 +84,7 @@ def get_list(res, session_dir):
             else:
                 flist.append({"name": path + "/" + item["name"], "size": item["size"]})
 
-    print_list(json.loads(res)["children"], session_dir)
+    print_list(res["data"], session_dir)
     return flist
 
 def print_dir(data: Dict, session: Session, directory:str) -> None:

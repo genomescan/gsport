@@ -7,9 +7,9 @@ TWO_FACTOR_AUTH_URL = "login/two-factor"
 LIST_RECURSIVE = "api/projects/"
 DOWNLOAD_RECURSIVE = "/data_api_recursive/"
 LOGOUT_URL = "api/logout"
-HOST_URL = "http://localhost:8000/"
-VERIFY_FILES_URL = "api/download/verify"
-DOWNLOAD_FILE_URL = "api/download/"
+HOST_URL = "http://localhost:80/"
+VERIFY_FILES_URL = "api/downloads/"
+DOWNLOAD_FILE_URL = "api/downloads/verify/"
 
 LIST_EXAMPLE_MESSAGE = """
 example usage:

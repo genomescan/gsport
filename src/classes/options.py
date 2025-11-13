@@ -183,7 +183,7 @@ class Options:
         self.threads = args.threads
         self.project = args.PROJECT
         self.download_all = True
-        self.output = args.output
+        self.output = args.output if args.output != "." else args.PROJECT
 
     def D(self, args):
         """
