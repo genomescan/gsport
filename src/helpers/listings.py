@@ -1,17 +1,19 @@
 import json
 import os
 import sys
+from typing import Dict
 
 import requests
 
 if sys.version_info >= (3, 10, 0):
     from terminalcolorpy import colored
 
-from src.helpers.print_functions import print_error, print_info, print_rec
-from src.variables import ALL_PROJECTS_API, DOWNLOAD_RECURSIVE
+from src.classes.session import Session
+from src.helpers.utils import is_file
+from src.helpers.print_functions import print_error, print_folders, print_only_files, print_info, print_rec
+from src.variables import ALL_PROJECTS_API, LIST_RECURSIVE
 
-
-def get_listing(session) -> None:
+def get_listing(session: Session) -> None:
     """
         Gets the json in the form {data: [{name:str, size: str, children: list[dict]}]}
         and prints the values in a certain way depending on it being default, -m or -r.
@@ -19,44 +21,29 @@ def get_listing(session) -> None:
     :return: None
     """
     response = requests.get(
-        session.options.host + DOWNLOAD_RECURSIVE + session.options.project,
+        session.options.host + LIST_RECURSIVE + session.options.project,
         cookies=session.cookies,
         params={"cd": session.options.dir},
     )
-
-    try:
+    if response.status_code == 200:
         datafiles = json.loads(response.text)
-    except json.decoder.JSONDecodeError:
-        print_error(f"[get_listing] Error reading response: {response.text}")
+    elif response.status_code == 404:
+        print(colored(text=f"No files were found for this project...", color="yellow"))
         exit(1)
-
+    else:
+        print_error(f"[get_listing] Error decoding the response")
+        exit(1)
+    if session.options.dir != "./":
+        print_dir(datafiles["data"][0]["children"], session, session.options.dir)
+        return
     if session.options.recursive:
-        print_rec(datafiles["children"], 0)
+        print_rec(datafiles["data"], 0)
     else:
         if not session.options.folder_mode:
-            for file in datafiles["children"]:
-                if file["type"] == "file":
-                    if sys.version_info >= (3, 10, 0):
-                        print(
-                            colored(text=file["name"], color="yellow"),
-                            "Size: ",
-                            colored(text=str(file["size"]), color="red"),
-                        )
-                    else:
-                        print(file["name"] + " Size:  " + str(file["size"]))
+            print_only_files(datafiles["data"][0]["children"])
+            return
         else:
-            for file in datafiles["children"]:
-                if len(file["name"]) > 0:
-                    if file["type"] == "directory":
-                        if sys.version_info >= (3, 10, 0):
-                            print(colored(text=file["name"], color="cyan"))
-                        else:
-                            print(file["name"])
-                    else:
-                        if sys.version_info >= (3, 10, 0):
-                            print(colored(text=file["name"], color="yellow"))
-                        else:
-                            print(file["name"])
+            print_folders(datafiles["data"][0]["children"])
 
 
 def list_all_projects(session) -> None:
@@ -85,7 +72,7 @@ def get_list(res, session_dir):
 
     def print_list(dic, path):
         for item in dic:
-            if item["type"] == "directory":
+            if not is_file(item):
                 d = os.path.join(path, item["name"])
                 if not os.path.isdir(d):
                     try:
@@ -98,3 +85,29 @@ def get_list(res, session_dir):
 
     print_list(json.loads(res)["children"], session_dir)
     return flist
+
+def print_dir(data: Dict, session: Session, directory:str) -> None:
+    """
+        Prints the files for an specific directory.
+    :param dic: An iterable containing dictionaries with the keys "children", "size" and "name".
+    :param depth: The recursive depth.
+    :return: None
+    """
+    # Had to overcomplicate this because split was giving empty strings
+    dir_parts =[ x for x in  directory.split('/', maxsplit=1) if x]
+    for file in data:
+        if not is_file(file):
+            if file["name"] == dir_parts[0]:
+                print( colored(text=file["name"], color="cyan"),)
+                if len(dir_parts) > 1:
+                    print_dir(file["children"], session, dir_parts[1])
+                    return
+                if session.options.recursive:
+                    print_rec(file["children"])
+                if session.options.folder_mode:
+                    print_folders(file["children"])
+                else:
+                    print_only_files(file["children"])
+                return
+            else:
+                print_dir(file["children"], session, directory)

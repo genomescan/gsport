@@ -60,28 +60,31 @@ class Session:
         )  # set the cookie.
         print_info("[login] Get login page")
         # Perform a GET request to obtain the CSRF token
-        response = session.get(HOST_URL + LOGIN_URL)
+        response = session.get(HOST_URL + LOGIN_URL, verify=False)
+        print(f"Request made to {HOST_URL + LOGIN_URL}")
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
-            username = input("Username: ")
+            email = input("Username: ")
             psw = getpass()
             login_data = dict(
-                username=username, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
+                email=email, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
             )
             response = session.post(
                 self.options.host + LOGIN_URL,
                 data=login_data,
                 headers=dict(Referer=self.options.host + LOGIN_URL),
+                verify=False,
             )
             # try to log in.
             if response.status_code != 200:
+                print(response)
                 print_warning(response.text)
                 continue
             login_data = dict(
                 token=input("Token: "),
                 password=psw,
-                username=username,
+                email=email,
                 csrfmiddlewaretoken=csrftoken,
                 next="/",
             )
