@@ -69,6 +69,7 @@ def list_all_projects(session) -> None:
 
 
 def get_list(res, session_dir):
+    print(session_dir)
     flist = []
 
     def print_list(dic, path):
@@ -82,7 +83,7 @@ def get_list(res, session_dir):
                         pass  # this can be the case with multithreading
                 print_list(item["children"], d)
             else:
-                flist.append({"name": path + "/" + item["name"], "size": item["size"]})
+                flist.append({"name":  item["name"], "size": item["size"]})
 
     print_list(res["data"], session_dir)
     return flist

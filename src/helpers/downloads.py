@@ -4,6 +4,7 @@ import json
 
 import requests
 
+from src.classes.session import Session
 from src.helpers.listings import get_list
 from src.helpers.print_functions import print_error, print_file, print_warning
 from src.helpers.url import get_url
@@ -17,7 +18,7 @@ def _get_file_names(files: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     return file_names
 
 
-def download(session) -> None:
+def download(session: Session) -> None:
     """
         Verify the files specified with the download command and passes the approved files to the get url.
     :param session: The session object.
@@ -25,20 +26,23 @@ def download(session) -> None:
     """
     datafiles = []
     if session.options.download:
-        response = requests.get(
-            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/n",
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-        datafiles = response.json()["data"]
-    elif session.options.download_all and session.options.recursive:
+        if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
+            session.options.dir = session.options.project + "/"  + session.options.dir
         response = requests.get(
             session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        print(response.text)
-        datafiles = get_list(response.json(), session.options.dir)
+        datafiles = response.json()["data"]
+    elif session.options.download_all and session.options.recursive:
+        if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
+            session.options.dir = session.options.project + "/"  + session.options.dir
+        response = requests.get(
+            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
+            cookies=session.cookies,
+            params={"cd": session.options.dir},
+        )
+        datafiles = get_list(response.json(), session.options.output)
     elif session.options.download_all:
         response = requests.get(
             session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/dirs",
@@ -59,6 +63,7 @@ def download(session) -> None:
 
         datafiles = []
         for file in requested:
+            file = f"{session.options.project}/{file}"
             if file not in allowed:
                 print_warning(
                     f"WARNING: {file} is not a valid file for download, make sure the path is spelled correctly."
@@ -77,8 +82,8 @@ def download(session) -> None:
         session.options.output
     ):  # Create the output folder if it doesn't exist.
         os.makedirs(session.options.output)
-    if session.options.download_all and session.options.recursive:
-        make_directories(datafiles, output=session.options.output)
+    # Make sure directories exist
+    make_directories(datafiles, output=session.options.output)
     get_url(session, datafiles)
 
 

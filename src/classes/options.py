@@ -178,12 +178,15 @@ class Options:
         :param args: The argument Namespace object.
         :return: None
         """
+        self.project = args.PROJECT
         self.dir = args.cd + "/"
+        print(self.dir)
+
         self.recursive = args.recursive
         self.threads = args.threads
-        self.project = args.PROJECT
         self.download_all = True
-        self.output = args.output if args.output != "." else args.PROJECT
+        self.output = args.output 
+        
 
     def D(self, args):
         """
