@@ -24,39 +24,28 @@ def download(session: Session) -> None:
     :param session: The session object.
     :return: None
     """
+    if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
+        session.options.dir = session.options.project + "/"  + session.options.dir
     datafiles = []
-    if session.options.download:
-        if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
-            session.options.dir = session.options.project + "/"  + session.options.dir
+    if session.options.download or (session.options.download_all and session.options.recursive):
         response = requests.get(
             session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = response.json()["data"]
-    elif session.options.download_all and session.options.recursive:
-        if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
-            session.options.dir = session.options.project + "/"  + session.options.dir
-        response = requests.get(
-            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-        datafiles = get_list(response.json(), session.options.output)
     elif session.options.download_all:
         response = requests.get(
             session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/dirs",
             cookies=session.cookies,
             params={"cd": session.options.dir},
         )
-        datafiles = response.json()["data"]
     else:
         exit(1)
 
     if response.status_code != 200:
         print_error(response.text)
         exit(1)
-
+    datafiles = get_list(response.json(), session.options.output)
     if session.options.download:
         requested = session.options.download
         allowed = _get_file_names(datafiles)
@@ -83,8 +72,22 @@ def download(session: Session) -> None:
     ):  # Create the output folder if it doesn't exist.
         os.makedirs(session.options.output)
     # Make sure directories exist
-    make_directories(datafiles, output=session.options.output)
+    datafiles = simplify_path(datafiles)
+    if session.options.download_all and session.options.recursive:
+        make_directories(datafiles, output=session.options.output)
     get_url(session, datafiles)
+
+
+def simplify_path(
+    datafiles: List[Dict[str, Union[str, int]]],
+) -> List[Dict[str, Union[str, int]]]:
+    """ Function to remove the project code from the project path. It is used to mimic the old gsport version file handling"""
+    for file in datafiles:
+        path = file["name"].split("/")
+        subdirectories = path[1:]
+        file["name"] = "/".join(subdirectories)
+    return datafiles
+
 
 
 def make_directories(

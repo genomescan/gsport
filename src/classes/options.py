@@ -180,8 +180,6 @@ class Options:
         """
         self.project = args.PROJECT
         self.dir = args.cd + "/"
-        print(self.dir)
-
         self.recursive = args.recursive
         self.threads = args.threads
         self.download_all = True
