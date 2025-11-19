@@ -1,25 +1,31 @@
 {
-  "name": "test_999",
-  "type": "directory",
-  "children": [
-    {"name": "test_map_salah",
-      "type": "directory",
+  "data": [
+    {
+      "name": "999",
+      "size": null,
       "children": [
         {
-          "name": "3660_Color_palette (1).pdf",
-          "type": "file",
-          "size": 517854
-        }]
-    },
-    {
-      "name": "test_10G.txt",
-      "type": "file",
-      "size": 10737418240
-    },
-    {
-      "name": "test2_10G.txt",
-      "type": "file",
-      "size": 10737418240
+          "name": "test_map_salah",
+          "size": null,
+          "children": [
+            {
+              "name": "3660_Color_palette (1).pdf",
+              "size": "517.9KB",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "test_10G.txt",
+          "size": "10.0GB",
+          "children": []
+        },
+        {
+          "name": "test2_10G.txt",
+          "size": "10.0GB",
+          "children": []
+        }
+      ]
     }
   ]
 }

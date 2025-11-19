@@ -69,7 +69,6 @@ def list_all_projects(session) -> None:
 
 
 def get_list(res, session_dir):
-    print(session_dir)
     flist = []
 
     def print_list(dic, path):
@@ -95,7 +94,6 @@ def print_dir(data: Dict, session: Session, directory:str) -> None:
     :param depth: The recursive depth.
     :return: None
     """
-    # Had to overcomplicate this because split was giving empty strings
     dir_parts =[ x for x in  directory.split('/', maxsplit=1) if x]
     for file in data:
         if not is_file(file):

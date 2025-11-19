@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import requests_mock
 
+from src.variables import HOST_URL, LOGGED_IN_URL
 from main import main
 from src.classes import Session
 
@@ -23,7 +24,7 @@ class TestLogin(unittest.TestCase):
 
         with requests_mock.Mocker() as m:
             m.get(
-                "https://portal.genomescan.nl//logged_in_api/",
+                f"{HOST_URL}{LOGGED_IN_URL}",
                 text='{"logged_in": false}',
                 status_code=200,
             )
