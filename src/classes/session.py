@@ -13,6 +13,7 @@ from src.helpers.eta_readable import human_readable_eta
 from src.helpers.print_functions import print_error, print_info, print_warning
 from src.helpers.sizeofmetric import size_of_metric_fmt
 from src.variables import (
+    CA_BUNDLE,
     GSPORT_VERSION,
     HOST_URL,
     LOGGED_IN_URL,
@@ -36,8 +37,7 @@ class Session:
         try:
             self.cookies.load()
             response = requests.get(
-                options.host + LOGGED_IN_URL, cookies=self.cookies
-            ).text
+                options.host + LOGGED_IN_URL, cookies=self.cookies, verify=CA_BUNDLE).text
             if json.loads(response)["logged_in"]:
                 print_info("[session] cookies found.")
             else:
@@ -61,8 +61,7 @@ class Session:
         )  # set the cookie.
         print_info("[login] Get login page")
         # Perform a GET request to obtain the CSRF token
-        response = session.get(HOST_URL + LOGIN_URL, verify=False)
-        print(f"Request made to {HOST_URL + LOGIN_URL}")
+        response = session.get(HOST_URL + LOGIN_URL, verify=CA_BUNDLE)
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
@@ -79,7 +78,6 @@ class Session:
             )
             # try to log in.
             if response.status_code != 200:
-                print(response)
                 print_warning(response.text)
                 continue
             login_data = dict(
@@ -96,6 +94,7 @@ class Session:
                     "Referer": self.options.host + LOGIN_URL,
                     "User-Agent": "gsport " + GSPORT_VERSION,
                 },
+                verify=CA_BUNDLE
             )
             if response.status_code != 200:
                 print_error(response.text)
@@ -120,7 +119,7 @@ class Session:
             dsize = 0
             start = time.time()
             with requests.get(
-                url, stream=True, cookies=self.cookies, params=params
+                url, stream=True, cookies=self.cookies, params=params, verify=CA_BUNDLE
             ) as r:  # Start the download.
                 self.options.dir = "/".join(self.options.dir.split("/")[:-1])
 
@@ -158,7 +157,7 @@ class Session:
         try:
             self.cookies.load()
             response = requests.get(
-                self.options.host + LOGOUT_URL, cookies=self.cookies
+                self.options.host + LOGOUT_URL, cookies=self.cookies, verify=CA_BUNDLE
             )
             if response.status_code == 200:
                 print_info("[logout] Logged out.")

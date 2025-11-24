@@ -1,5 +1,8 @@
+from pathlib import Path
+
 GSPORT_VERSION = "3.0"
 
+ROOT_DIR = Path(__file__).parent.parent
 ALL_PROJECTS_API = "api/projects"
 LOGIN_URL = "login/"
 LOGGED_IN_URL = "login/logged-in"
@@ -7,9 +10,13 @@ TWO_FACTOR_AUTH_URL = "login/two-factor"
 LIST_RECURSIVE = "api/projects/"
 DOWNLOAD_RECURSIVE = "/data_api_recursive/"
 LOGOUT_URL = "api/logout"
-HOST_URL = "http://localhost:8000/"
+# HOST_URL = "http://localhost:80/"
+HOST_URL = "https://gs-vm-portal-dev/"
 VERIFY_FILES_URL = "api/downloads/"
 DOWNLOAD_FILE_URL = "api/downloads/verify/"
+# CA_BUNDLE = f"{ROOT_DIR}/assets/ca_bundle/cacert-2025-11-04.pem" 
+CA_BUNDLE = False 
+
 
 LIST_EXAMPLE_MESSAGE = """
 example usage:

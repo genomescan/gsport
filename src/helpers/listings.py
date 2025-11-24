@@ -12,7 +12,7 @@ if sys.version_info >= (3, 10, 0):
 from src.classes.session import Session
 from src.helpers.utils import is_file
 from src.helpers.print_functions import print_error, print_folders, print_only_files, print_info, print_rec
-from src.variables import ALL_PROJECTS_API, LIST_RECURSIVE
+from src.variables import ALL_PROJECTS_API, CA_BUNDLE, LIST_RECURSIVE
 
 def get_listing(session: Session) -> None:
     """
@@ -25,6 +25,7 @@ def get_listing(session: Session) -> None:
         session.options.host + LIST_RECURSIVE + session.options.project,
         cookies=session.cookies,
         params={"cd": session.options.dir},
+        verify=CA_BUNDLE
     )
     if response.status_code == 200:
         datafiles = json.loads(response.text)
@@ -55,7 +56,7 @@ def list_all_projects(session) -> None:
     """
     print_info("[requesting projects]")
     response = requests.get(
-        session.options.host + ALL_PROJECTS_API, cookies=session.cookies
+        session.options.host + ALL_PROJECTS_API, cookies=session.cookies, verify=CA_BUNDLE
     )
     try:
         projects = response.json()

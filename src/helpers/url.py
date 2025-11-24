@@ -2,6 +2,7 @@ import os
 from typing import Dict, List, Union
 
 import requests
+from requests.api import options
 
 from src.helpers.parallel_download import download_parallel
 from src.variables import VERIFY_FILES_URL
@@ -28,7 +29,7 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
             else os.path.join(session.options.output, os.path.normpath(file["name"]))
         )
         filename = (
-            file["name"]
+            os.path.join(session.options.project, file["name"])
         )
         dl_sum += fsize
         filename = filename.replace("\\", "/")
