@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import sys
 from typing import Dict
 import json
@@ -24,7 +25,7 @@ def get_listing(session: Session) -> None:
     response = requests.get(
         session.options.host + LIST_RECURSIVE + session.options.project,
         cookies=session.cookies,
-        params={"cd": session.options.dir},
+        params={"cd": Path(f"{session.options.project}/{session.options.dir}").as_posix()},
         verify=CA_BUNDLE
     )
     if response.status_code == 200:
@@ -35,6 +36,7 @@ def get_listing(session: Session) -> None:
     else:
         print_error(f"[get_listing] Error decoding the response")
         exit(1)
+
     if session.options.dir != "./":
         print_dir(datafiles["data"][0]["children"], session, session.options.dir)
         return
@@ -45,6 +47,9 @@ def get_listing(session: Session) -> None:
             print_only_files(datafiles["data"][0]["children"])
             return
         else:
+            print(
+                colored(text=session.options.project, color="cyan"),
+            )
             print_folders(datafiles["data"][0]["children"])
 
 
@@ -99,7 +104,7 @@ def print_dir(data: Dict, session: Session, directory:str) -> None:
     for file in data:
         if not is_file(file):
             if file["name"] == dir_parts[0]:
-                print( colored(text=file["name"], color="cyan"),)
+                print(colored(text=file["name"], color="cyan"),)
                 if len(dir_parts) > 1:
                     print_dir(file["children"], session, dir_parts[1])
                     return

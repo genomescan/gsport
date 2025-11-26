@@ -91,7 +91,7 @@ def print_folders(data: Dict) -> None:
         if len(file["name"]) > 0:
             if not is_file(file):
                 if sys.version_info >= (3, 10, 0):
-                    print(
+                    print("└──" +  
                         colored(text=file["name"], color="cyan"),
                     )
                 else:

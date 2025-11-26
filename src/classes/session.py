@@ -36,6 +36,7 @@ class Session:
             self.logout()
         try:
             self.cookies.load()
+            print(CA_BUNDLE)
             response = requests.get(
                 options.host + LOGGED_IN_URL, cookies=self.cookies, verify=CA_BUNDLE).text
             if json.loads(response)["logged_in"]:
