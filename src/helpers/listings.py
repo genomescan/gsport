@@ -33,8 +33,11 @@ def get_listing(session: Session) -> None:
     elif response.status_code == 404:
         print(colored(text=f"No files were found for this project...", color="yellow"))
         exit(1)
+    elif response.status_code == 403:
+        print(colored(text=f"You are not allowed to access that project", color="red"))
+        exit(1)
     else:
-        print_error(f"[get_listing] Error decoding the response")
+        print_error(f"[get_listing] Error reading response: {response.text}")
         exit(1)
 
     if session.options.dir != "./":
