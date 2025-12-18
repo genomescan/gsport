@@ -140,10 +140,10 @@ class Session:
                                     + str(round(dsize / fsize * 100))
                                     + "% "
                                     + str(size_of_metric_fmt(rate))
-                                    + "/sec ",
-                                    "ETA:",
-                                    human_readable_eta((fsize - dsize) / rate),
-                                    end="     ",
+                                    + "/sec "
+                                    + "ETA:"
+                                    + human_readable_eta((fsize - dsize) / rate),
+                                    end="",
                                 )
                             else:
                                 self.queue.put([len(chunk), False])
