@@ -112,7 +112,7 @@ def print_dir(data: Dict, session: Session, directory:str) -> None:
                     print_dir(file["children"], session, dir_parts[1])
                     return
                 if session.options.recursive:
-                    print_rec(file["children"])
+                    print_rec(file["children"], 1)
                 if session.options.folder_mode:
                     print_folders(file["children"])
                 else:
