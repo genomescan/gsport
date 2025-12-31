@@ -49,7 +49,10 @@ def print_rec(dic, depth: int = 0) -> None:
             for i in range(depth * 2):
                 print("  ", end="")
             if sys.version_info >= (3, 10, 0):
-                print("└──", colored(text=item["name"], color="cyan"))
+                if depth == 0:
+                    print(colored(text=item["name"], color="cyan"))
+                else:
+                    print("└──", colored(text=item["name"], color="cyan"))
             else:
                 print("└── " + item["name"])
             print_rec(item["children"], depth + 1)
@@ -69,7 +72,9 @@ def print_rec(dic, depth: int = 0) -> None:
                     "├── " + item["name"] + " Size:  " + str(item["size"]),
                 )
 
-def print_only_files(data: Dict):
+def print_only_files(project_code: str, data: Dict):
+    if project_code != None:
+        print(colored(text=project_code, color="cyan"))
     file_count = 0
     for file in data:
         if is_file(file):

@@ -47,7 +47,7 @@ def get_listing(session: Session) -> None:
         print_rec(datafiles["data"], 0)
     else:
         if not session.options.folder_mode:
-            print_only_files(datafiles["data"][0]["children"])
+            print_only_files(session.options.project,datafiles["data"][0]["children"])
             return
         else:
             print(
@@ -116,7 +116,7 @@ def print_dir(data: Dict, session: Session, directory:str) -> None:
                 if session.options.folder_mode:
                     print_folders(file["children"])
                 else:
-                    print_only_files(file["children"])
+                    print_only_files(None,file["children"])
                 return
             else:
                 print_dir(file["children"], session, directory)

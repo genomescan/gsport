@@ -59,7 +59,7 @@ class TestListcommand(unittest.TestCase):
                     recursive_mock = recursive_mock_file.read()
 
                 m.get(
-                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=.%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=recursive_mock,
                 )
 
@@ -100,7 +100,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=.%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
@@ -142,7 +142,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=.%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
@@ -183,7 +183,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=.%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
