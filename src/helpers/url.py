@@ -1,9 +1,6 @@
 import os
 from typing import Dict, List, Union
 
-import requests
-from requests.api import options
-
 from src.helpers.parallel_download import download_parallel
 from src.variables import VERIFY_FILES_URL
 
