@@ -84,7 +84,7 @@ def print_only_files(project_code: str, data: Dict):
                     colored(text=file["name"], color="yellow"),
                     "Size: ",
                     colored(text=str(file["size"]), color="red"),
-                )
+                    )
             else:
                 print("└──",file["name"] + " Size:  " + str(file["size"]))
     if file_count == 0:
