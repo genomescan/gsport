@@ -113,7 +113,6 @@ class TestListcommand(unittest.TestCase):
 
                 expected_output = "[session] cookies found.\n999\n└── test_10G.txt Size:  10.0GB\n└── test2_10G.txt Size:  10.0GB\n"
 
-
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
                 )

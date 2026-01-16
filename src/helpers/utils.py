@@ -7,6 +7,5 @@ def is_file(file: Dict) -> bool:
     :param session: Session object.
     :return: None
     """
-    # I we could put this insted of the function, but improves readability 
-    return file["size"] != None
-
+    # I we could put this insted of the function, but improves readability
+    return file["size"] is not None
