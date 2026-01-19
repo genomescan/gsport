@@ -37,7 +37,8 @@ class Session:
         try:
             self.cookies.load()
             response = requests.get(
-                options.host + LOGGED_IN_URL, cookies=self.cookies, verify=CA_BUNDLE).text
+                options.host + LOGGED_IN_URL, cookies=self.cookies, verify=CA_BUNDLE
+            ).text
             if json.loads(response)["logged_in"]:
                 print_info("[session] cookies found.")
             else:
@@ -94,7 +95,7 @@ class Session:
                     "Referer": self.options.host + LOGIN_URL,
                     "User-Agent": "gsport " + GSPORT_VERSION,
                 },
-                verify=CA_BUNDLE
+                verify=CA_BUNDLE,
             )
             if response.status_code != 200:
                 print_error(response.text)
@@ -107,7 +108,7 @@ class Session:
         print_info("[login] Done.")
         self.cookies = session.cookies
 
-    def download_file(self, url: str, params: Dict,fsize: int, fname: str) -> None:
+    def download_file(self, url: str, params: Dict, fsize: int, fname: str) -> None:
         """
             Download the file by streaming the dat from the url.
         :param url: The download link.
@@ -115,6 +116,7 @@ class Session:
         :param fname: The filename.
         :return: None
         """
+
         try:
             dsize = 0
             start = time.time()

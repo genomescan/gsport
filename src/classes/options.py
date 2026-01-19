@@ -183,7 +183,7 @@ class Options:
         self.recursive = args.recursive
         self.threads = args.threads
         self.download_all = True
-        self.output = args.output 
+        self.output = args.output
 
     def D(self, args):
         """

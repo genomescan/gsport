@@ -54,7 +54,7 @@ def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
             continue
 
         if finished_processes_amount == number_of_processes:
-            #VT100 escape code to clear current line
+            # VT100 escape code to clear current line
             print_info("\r\033[2KDownloading complete")
             break
 
@@ -90,6 +90,6 @@ def download_parallel(session, dl_list: List[list], dl_sum: int) -> None:
             )
 
         if finished_processes_amount == number_of_processes:
-            #VT100 escape code to clear current line
+            # VT100 escape code to clear current line
             print_info("\r\033[2KDownloading complete")
             break

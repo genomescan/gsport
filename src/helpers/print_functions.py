@@ -1,8 +1,6 @@
 import sys
 from typing import Dict
 
-
-
 from src.helpers.utils import is_file
 
 if sys.version_info >= (3, 10, 0):
@@ -72,42 +70,50 @@ def print_rec(dic, depth: int = 0) -> None:
                     "├── " + item["name"] + " Size:  " + str(item["size"]),
                 )
 
+
 def print_only_files(project_code: str, data: Dict):
-    if project_code != None:
+    if project_code is not None:
         print(colored(text=project_code, color="cyan"))
+
     file_count = 0
     for file in data:
         if is_file(file):
             file_count += 1
             if sys.version_info >= (3, 10, 0):
-                print("└──",
+                print(
+                    "└──",
                     colored(text=file["name"], color="yellow"),
                     "Size: ",
                     colored(text=str(file["size"]), color="red"),
-                    )
+                )
             else:
-                print("└──",file["name"] + " Size:  " + str(file["size"]))
+                print("└──", file["name"] + " Size:  " + str(file["size"]))
     if file_count == 0:
-        # TODO: Mention this somewhere else in documentation, mb remove if we do not want to print nothing 
-        print(colored(text="No files were found in the project root directory", color="yellow")),
+        # TODO: Mention this somewhere else in documentation, mb remove if we do not want to print nothing
+        print(
+            colored(
+                text="No files were found in the project root directory", color="yellow"
+            )
+        )
+
 
 def print_folders(data: Dict) -> None:
     for file in data:
         if len(file["name"]) > 0:
             if not is_file(file):
                 if sys.version_info >= (3, 10, 0):
-                    print("└──" +  
-                        colored(text=file["name"], color="cyan"),
+                    print(
+                        "└──" + colored(text=file["name"], color="cyan"),
                     )
                 else:
                     print(file["name"])
             else:
                 if sys.version_info >= (3, 10, 0):
-                    print("└──",
+                    print(
+                        "└──",
                         colored(text=file["name"], color="yellow"),
                         "Size: ",
                         colored(text=str(file["size"]), color="red"),
                     )
                 else:
                     print(file["name"])
-

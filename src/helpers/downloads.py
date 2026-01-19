@@ -1,6 +1,5 @@
 import os
 from typing import Dict, List, Union
-import json
 
 import requests
 
@@ -8,7 +7,7 @@ from src.classes.session import Session
 from src.helpers.listings import get_list
 from src.helpers.print_functions import print_error, print_file, print_warning
 from src.helpers.url import get_url
-from src.variables import CA_BUNDLE, DOWNLOAD_FILE_URL, DOWNLOAD_RECURSIVE
+from src.variables import CA_BUNDLE, DOWNLOAD_FILE_URL
 
 
 def _get_file_names(files: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
@@ -24,22 +23,33 @@ def download(session: Session) -> None:
     :param session: The session object.
     :return: None
     """
-    if session.options.dir.split("/")[0] != session.options.project and session.options.dir != "./":
-        session.options.dir = session.options.project + "/"  + session.options.dir
+    if (
+        session.options.dir.split("/")[0] != session.options.project
+        and session.options.dir != "./"
+    ):
+        session.options.dir = session.options.project + "/" + session.options.dir
     datafiles = []
-    if session.options.download or (session.options.download_all and session.options.recursive):
+    if session.options.download or (
+        session.options.download_all and session.options.recursive
+    ):
         response = requests.get(
-            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/recursive",
+            session.options.host
+            + DOWNLOAD_FILE_URL
+            + session.options.project
+            + "/recursive",
             cookies=session.cookies,
             params={"cd": session.options.dir},
-            verify=CA_BUNDLE
+            verify=CA_BUNDLE,
         )
     elif session.options.download_all:
         response = requests.get(
-            session.options.host + DOWNLOAD_FILE_URL + session.options.project + "/dirs",
+            session.options.host
+            + DOWNLOAD_FILE_URL
+            + session.options.project
+            + "/dirs",
             cookies=session.cookies,
             params={"cd": session.options.dir},
-            verify=CA_BUNDLE
+            verify=CA_BUNDLE,
         )
     else:
         exit(1)
@@ -83,13 +93,12 @@ def download(session: Session) -> None:
 def simplify_path(
     datafiles: List[Dict[str, Union[str, int]]],
 ) -> List[Dict[str, Union[str, int]]]:
-    """ Function to remove the project code from the project path. It is used to mimic the old gsport version file handling"""
+    """Function to remove the project code from the project path. It is used to mimic the old gsport version file handling"""
     for file in datafiles:
         path = file["name"].split("/")
         subdirectories = path[1:]
         file["name"] = "/".join(subdirectories)
     return datafiles
-
 
 
 def make_directories(

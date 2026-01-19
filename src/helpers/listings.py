@@ -1,9 +1,8 @@
 import json
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Dict
-import json
 
 import requests
 
@@ -11,9 +10,16 @@ if sys.version_info >= (3, 10, 0):
     from terminalcolorpy import colored
 
 from src.classes.session import Session
+from src.helpers.print_functions import (
+    print_error,
+    print_folders,
+    print_info,
+    print_only_files,
+    print_rec,
+)
 from src.helpers.utils import is_file
-from src.helpers.print_functions import print_error, print_folders, print_only_files, print_info, print_rec
 from src.variables import ALL_PROJECTS_API, CA_BUNDLE, LIST_RECURSIVE
+
 
 def get_listing(session: Session) -> None:
     """
@@ -25,16 +31,23 @@ def get_listing(session: Session) -> None:
     response = requests.get(
         session.options.host + LIST_RECURSIVE + session.options.project,
         cookies=session.cookies,
-        params={"cd": Path(f"{session.options.project}/{session.options.dir}").as_posix()},
-        verify=CA_BUNDLE
+        params={
+            "cd": Path(f"{session.options.project}/{session.options.dir}").as_posix()
+        },
+        verify=CA_BUNDLE,
     )
     if response.status_code == 200:
         datafiles = json.loads(response.text)
     elif response.status_code == 404:
-        print(colored(text=f"No files were found, make sure project and/or directory are correct", color="yellow"))
+        print(
+            colored(
+                text="No files were found, make sure project and/or directory are correct",
+                color="yellow",
+            )
+        )
         exit(1)
     elif response.status_code == 403:
-        print(colored(text=f"You are not allowed to access that project", color="red"))
+        print(colored(text="You are not allowed to access that project", color="red"))
         exit(1)
     else:
         print_error(f"[get_listing] Error reading response: {response.text}")
@@ -47,7 +60,7 @@ def get_listing(session: Session) -> None:
         print_rec(datafiles["data"], 0)
     else:
         if not session.options.folder_mode:
-            print_only_files(session.options.project,datafiles["data"][0]["children"])
+            print_only_files(session.options.project, datafiles["data"][0]["children"])
             return
         else:
             print(
@@ -64,7 +77,9 @@ def list_all_projects(session) -> None:
     """
     print_info("[requesting projects]")
     response = requests.get(
-        session.options.host + ALL_PROJECTS_API, cookies=session.cookies, verify=CA_BUNDLE
+        session.options.host + ALL_PROJECTS_API,
+        cookies=session.cookies,
+        verify=CA_BUNDLE,
     )
     try:
         projects = response.json()
@@ -91,23 +106,26 @@ def get_list(res, session_dir):
                         pass  # this can be the case with multithreading
                 print_list(item["children"], d)
             else:
-                flist.append({"name":  item["name"], "size": item["size"]})
+                flist.append({"name": item["name"], "size": item["size"]})
 
     print_list(res["data"], session_dir)
     return flist
 
-def print_dir(data: Dict, session: Session, directory:str) -> None:
+
+def print_dir(data: Dict, session: Session, directory: str) -> None:
     """
         Prints the files for an specific directory.
     :param dic: An iterable containing dictionaries with the keys "children", "size" and "name".
     :param depth: The recursive depth.
     :return: None
     """
-    dir_parts =[ x for x in  directory.split('/', maxsplit=1) if x]
+    dir_parts = [x for x in directory.split("/", maxsplit=1) if x]
     for file in data:
         if not is_file(file):
             if file["name"] == dir_parts[0]:
-                print(colored(text=file["name"], color="cyan"),)
+                print(
+                    colored(text=file["name"], color="cyan"),
+                )
                 if len(dir_parts) > 1:
                     print_dir(file["children"], session, dir_parts[1])
                     return
@@ -116,7 +134,7 @@ def print_dir(data: Dict, session: Session, directory:str) -> None:
                 if session.options.folder_mode:
                     print_folders(file["children"])
                 else:
-                    print_only_files(None,file["children"])
+                    print_only_files(None, file["children"])
                 return
             else:
                 print_dir(file["children"], session, directory)
