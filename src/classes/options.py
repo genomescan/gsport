@@ -184,7 +184,6 @@ class Options:
         self.threads = args.threads
         self.download_all = True
         self.output = args.output 
-        
 
     def D(self, args):
         """
