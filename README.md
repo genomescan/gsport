@@ -56,38 +56,47 @@ This will print a full list of available options and flags.
 ### List Files
 
 ```bash
+# shows all the files associated with the project from the top level but not any directory or files within directories
 gsport list 100000
+ # shows all the folders/directories under that project but not their content   
 gsport list 100000 -m
+# shows all the files under a directory for that project, no subfolder or files in there
 gsport list 100000 -d directory
+# shows all the files and folders under a directory for that project but not the content of the folders
 gsport list 100000 -m -d directory
+# shows all the files and folders in a tree like structure
 gsport list 100000 -r
+# shows all the files and folders in a tree like structure under a directory for that project
 gsport list 100000 -r -d directory
 ```
 
 ### Download All Files
 
 ```bash
+# downloads al the files associated with the project from the top level but not any files within directories
 gsport all 100000
+# downloads only the files directly under a directory, no subfolder or files in there
 gsport all 100000 -d directory
+# downloads all the files and folders for that project
 gsport all 100000 -r
+# downloads all the files and folders under a directory for that project
 gsport all 100000 -r -d directory
+# downloads all the files associated with the project from the top level but not any files within directories and outputs them in a directory called outputdir
 gsport all 100000 -o outputdir
 ```
 
 ### Download Specific Files
 
 ```bash
-gsport download 100000 path/to/file1.txt path/to/file2.txt
-gsport download 100000 path/to/file.txt -o outputdir
+# downloads the specific files, they have to be in the root directory
+gsport download 100000 test.txt test2.txt
+# downloads the specific files and outputs them in a directory called outputdir
+gsport download 100000 test.txt -o outputdir
 ```
 
-### Advanced Examples
+### Show available projects
 
 ```bash
-gsport -p 100000 -l                        # List all files in the project
-gsport -p 100000 -ls                       # List files with size
-gsport -p 100000 -l --dirs                 # List only folders/directories
-gsport -p 100000 -l --cd Analysis          # List files under "Analysis"
-gsport -p 100000 -l -r                     # List all in a recursive tree
-gsport -p 100000 -l --dirs --cd Analysis   # List folders under Analysis
+# List all projects you have access to
+gsport -p
 ```
