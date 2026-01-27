@@ -1,4 +1,6 @@
-GSPORT_VERSION = "2.0"
+import importlib.metadata
+
+GSPORT_VERSION = importlib.metadata.version("gsport")
 
 ALL_PROJECTS_API = "get_projects/"
 LOGIN_URL = "/login/"
