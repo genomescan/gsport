@@ -1,6 +1,6 @@
 GSPORT_VERSION = "2.0"
 
-ALL_PROJECTS_API = "api/projects-all"
+ALL_PROJECTS_API = "get_projects/"
 LOGIN_URL = "/login/"
 LOGGED_IN_URL = "/logged_in_api/"
 TWO_FACTOR_AUTH_URL = "/otp_ok/"

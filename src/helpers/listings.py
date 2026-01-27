@@ -71,7 +71,7 @@ def list_all_projects(session) -> None:
     )
     try:
         projects = response.json()
-        for i in projects["response"]:
+        for i in projects["projects"]:
             print(i)
         if response.status_code != 200:
             exit(1)
