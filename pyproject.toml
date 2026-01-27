@@ -19,8 +19,7 @@ license-files = ["LICENSE"]
 
 dependencies = [
     "requests==2.32.4",
-    "terminalcolorpy; python_version >= '3.10'",
-    "importlib; python_version >= '3.10'"
+    "terminalcolorpy; python_version >= '3.10'"
 ]
 
 [project.urls]

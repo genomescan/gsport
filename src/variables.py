@@ -1,10 +1,4 @@
-import importlib.metadata
-
-try:
-    GSPORT_VERSION = importlib.metadata.version("gsport")
-except importlib.metadata.PackageNotFoundError:
-    GSPORT_VERSION = "~2.0"
-
+GSPORT_VERSION = "2.0.1"
 ALL_PROJECTS_API = "get_projects/"
 LOGIN_URL = "/login/"
 LOGGED_IN_URL = "/logged_in_api/"
