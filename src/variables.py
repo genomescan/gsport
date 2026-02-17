@@ -1,6 +1,7 @@
 from pathlib import Path
 
 GSPORT_VERSION = "3.0"
+CLIENT_VERSION = f"GS_{GSPORT_VERSION}"
 
 ROOT_DIR = Path(__file__).parent.parent
 ALL_PROJECTS_API = "api/projects"
