@@ -2,7 +2,7 @@ import os
 from typing import Dict, List, Union
 
 from src.helpers.parallel_download import download_parallel
-from src.variables import VERIFY_FILES_URL
+from src.variables import CLIENT_VERSION, VERIFY_FILES_URL
 
 
 def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
@@ -29,7 +29,11 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
         dl_sum += fsize
         filename = filename.replace("\\", "/")
         url = session.options.host + VERIFY_FILES_URL + session.options.project
-        params = {"project": session.options.project, "file": filename}
+        params = {
+            "project": session.options.project,
+            "file": filename,
+            "version": f"{CLIENT_VERSION}",
+        }
         dl_list.append([url, params, fsize, fname])
 
     download_parallel(session, dl_list, dl_sum)
