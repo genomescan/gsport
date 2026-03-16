@@ -7,7 +7,7 @@ from src.classes.session import Session
 from src.helpers.listings import get_list
 from src.helpers.print_functions import print_error, print_file, print_warning
 from src.helpers.url import get_url
-from src.variables import CA_BUNDLE, DOWNLOAD_FILE_URL
+from src.variables import DOWNLOAD_FILE_URL
 
 
 def _get_file_names(files: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
@@ -39,7 +39,6 @@ def download(session: Session) -> None:
             + "/recursive",
             cookies=session.cookies,
             params={"cd": session.options.dir},
-            verify=CA_BUNDLE,
         )
     elif session.options.download_all:
         response = requests.get(
@@ -49,7 +48,6 @@ def download(session: Session) -> None:
             + "/dirs",
             cookies=session.cookies,
             params={"cd": session.options.dir},
-            verify=CA_BUNDLE,
         )
     else:
         exit(1)

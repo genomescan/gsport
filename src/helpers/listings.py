@@ -18,7 +18,7 @@ from src.helpers.print_functions import (
     print_rec,
 )
 from src.helpers.utils import is_file
-from src.variables import ALL_PROJECTS_API, CA_BUNDLE, LIST_RECURSIVE
+from src.variables import ALL_PROJECTS_API, LIST_RECURSIVE
 
 
 def get_listing(session: Session) -> None:
@@ -34,7 +34,6 @@ def get_listing(session: Session) -> None:
         params={
             "cd": Path(f"{session.options.project}/{session.options.dir}").as_posix()
         },
-        verify=CA_BUNDLE,
     )
     if response.status_code == 200:
         datafiles = json.loads(response.text)
@@ -79,7 +78,6 @@ def list_all_projects(session) -> None:
     response = requests.get(
         session.options.host + ALL_PROJECTS_API,
         cookies=session.cookies,
-        verify=CA_BUNDLE,
     )
     try:
         projects = response.json()

@@ -13,7 +13,6 @@ LOGOUT_URL = "api/logout"
 HOST_URL = "https://gs-vm-portal-dev/"
 VERIFY_FILES_URL = "api/downloads/"
 DOWNLOAD_FILE_URL = "api/downloads/verify/"
-CA_BUNDLE = False
 
 
 LIST_EXAMPLE_MESSAGE = """
