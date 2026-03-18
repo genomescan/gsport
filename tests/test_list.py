@@ -6,8 +6,8 @@ from unittest.mock import mock_open, patch
 
 import requests_mock
 
-from src.variables import HOST_URL, LIST_RECURSIVE, LOGGED_IN_URL
 from main import main
+from src.variables import HOST_URL, LIST_RECURSIVE, LOGGED_IN_URL
 
 """
 Tests for the list command
@@ -70,7 +70,9 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n└──test_map_salah\n└──test_999\n"
+                expected_output = (
+                    "[session] cookies found.\n999\n└──test_map_salah\n└──test_999\n"
+                )
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -111,7 +113,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n└── test_10G.txt Size:  10.0GB\n└── test2_10G.txt Size:  10.0GB\n"
+                expected_output = "[session] cookies found.\n999\n└── test_10G.txt Size:  010.0GB Status:  perm_deleted\n└── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -152,7 +154,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n└──test_map_salah\n└── test_10G.txt Size:  10.0GB\n└── test2_10G.txt Size:  10.0GB\n"
+                expected_output = "[session] cookies found.\n999\n└──test_map_salah\n└── test_10G.txt Size:  010.0GB Status:  perm_deleted\n└── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -193,7 +195,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n    └── test_map_salah\n        ├── 3660_Color_palette (1).pdf Size:  517.9KB\n    ├── test_10G.txt Size:  10.0GB\n    ├── test2_10G.txt Size:  10.0GB\n"
+                expected_output = "[session] cookies found.\n999\n    └── test_map_salah\n        ├── 3660_Color_palette (1).pdf Size:  517.9KB Status:  perm_deleted\n    ├── test_10G.txt Size:  010.0GB Status:  perm_deleted\n    ├── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
