@@ -1,7 +1,7 @@
 import sys
 from typing import Dict
 
-from src.helpers.utils import is_file
+from src.helpers.utils import format_size, is_file
 
 if sys.version_info >= (3, 10, 0):
     from terminalcolorpy import colored, printcolor
@@ -42,18 +42,18 @@ def print_rec(dic, depth: int = 0) -> None:
     :param depth: The recursive depth.
     :return: None
     """
-    for item in dic:
-        if not is_file(item):
+    for file in dic:
+        if not is_file(file):
             for i in range(depth * 2):
                 print("  ", end="")
             if sys.version_info >= (3, 10, 0):
                 if depth == 0:
-                    print(colored(text=item["name"], color="cyan"))
+                    print(colored(text=file["name"], color="cyan"))
                 else:
-                    print("└──", colored(text=item["name"], color="cyan"))
+                    print("└──", colored(text=file["name"], color="cyan"))
             else:
-                print("└── " + item["name"])
-            print_rec(item["children"], depth + 1)
+                print("└── " + file["name"])
+            print_rec(file["children"], depth + 1)
         else:
             for i in range(depth * 2):
                 print("  ", end="")
@@ -61,13 +61,15 @@ def print_rec(dic, depth: int = 0) -> None:
             if sys.version_info >= (3, 10, 0):
                 print(
                     "├──",
-                    colored(text=item["name"], color="yellow"),
+                    colored(text=file["name"], color="yellow"),
                     "Size: ",
-                    colored(text=str(item["size"]), color="red"),
+                    colored(text=format_size(str(file["size"])), color="red"),
+                    "Status: ",
+                    colored(text=str(file["file_status"]), color="red"),
                 )
             else:
                 print(
-                    "├── " + item["name"] + " Size:  " + str(item["size"]),
+                    "├── " + file["name"] + " Size:  " + str(file["size"]),
                 )
 
 
@@ -84,10 +86,12 @@ def print_only_files(project_code: str, data: Dict):
                     "└──",
                     colored(text=file["name"], color="yellow"),
                     "Size: ",
-                    colored(text=str(file["size"]), color="red"),
+                    colored(text=format_size(str(file["size"])), color="red"),
+                    "Status: ",
+                    colored(text=str(file["file_status"]), color="red"),
                 )
             else:
-                print("└──", file["name"] + " Size:  " + str(file["size"]))
+                print("└──", file["name"] + " Size:  " + format_size(str(file["size"])))
     if file_count == 0:
         # TODO: Mention this somewhere else in documentation, mb remove if we do not want to print nothing
         print(
@@ -113,7 +117,9 @@ def print_folders(data: Dict) -> None:
                         "└──",
                         colored(text=file["name"], color="yellow"),
                         "Size: ",
-                        colored(text=str(file["size"]), color="red"),
+                        colored(text=format_size(str(file["size"])), color="red"),
+                        "Status: ",
+                        colored(text=str(file["file_status"]), color="red"),
                     )
                 else:
                     print(file["name"])
