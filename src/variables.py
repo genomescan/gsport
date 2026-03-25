@@ -5,7 +5,7 @@ LOGGED_IN_URL = "/logged_in_api/"
 TWO_FACTOR_AUTH_URL = "/otp_ok/"
 DOWNLOAD_RECURSIVE = "/data_api_recursive/"
 LOGOUT_URL = "/accounts/logout/"
-HOST_URL = "https://portal.genomescan.nl/"
+HOST_URL = "http://portal.genomescan.nl/"
 VERIFY_FILES_URL = "/gen_session_file/"
 DOWNLOAD_FILE_URL = "/data_api2/"
 

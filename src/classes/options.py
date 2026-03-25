@@ -1,5 +1,6 @@
 import argparse
 import os
+from pathlib import Path
 
 from src.helpers import print_functions
 from src.variables import (
@@ -167,7 +168,7 @@ class Options:
         :return: None
         """
         self.folder_mode = args.dirs
-        self.dir = os.path.join(args.cd, "")
+        self.dir = Path(args.cd).as_posix()
         self.recursive = args.recursive
         self.project = args.PROJECT
         self.listing = True
@@ -178,7 +179,7 @@ class Options:
         :param args: The argument Namespace object.
         :return: None
         """
-        self.dir = os.path.join(args.cd, "")
+        self.dir = Path(args.cd).as_posix()
         self.recursive = args.recursive
         self.threads = args.threads
         self.project = args.PROJECT
