@@ -131,7 +131,7 @@ class Options:
         subparser_download_all.set_defaults(func=self.A)
 
         # Parse arguments.
-        args = parser.parse_args()
+        args = parser.parse_args(argv[1:])
 
         self.host: str = (
             args.host
@@ -167,7 +167,7 @@ class Options:
         :return: None
         """
         self.folder_mode = args.dirs
-        self.dir = args.cd + "/"
+        self.dir = os.path.join(args.cd, "")
         self.recursive = args.recursive
         self.project = args.PROJECT
         self.listing = True
@@ -178,7 +178,7 @@ class Options:
         :param args: The argument Namespace object.
         :return: None
         """
-        self.dir = args.cd + "/"
+        self.dir = os.path.join(args.cd, "")
         self.recursive = args.recursive
         self.threads = args.threads
         self.project = args.PROJECT
@@ -193,5 +193,5 @@ class Options:
         """
         self.download = args.FILE
         self.project = args.PROJECT
-        self.threads = os.cpu_count()
+        self.threads = os.cpu_count() or 1
         self.output = args.output
