@@ -1,5 +1,6 @@
 import sys
 
+import multiprocessing
 from src.classes import Options, Session
 from src.helpers.downloads import download
 from src.helpers.listings import get_listing, list_all_projects
@@ -19,6 +20,7 @@ def main():
 
 if __name__ == "__main__":
     try:
+        multiprocessing.freeze_support()
         main()
     except KeyboardInterrupt:
         print()
