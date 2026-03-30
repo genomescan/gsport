@@ -28,7 +28,7 @@ def get_listing(session) -> None:
         datafiles = json.loads(response.text)
     except json.decoder.JSONDecodeError:
         print_error(f"[get_listing] Error reading response: {response.text}")
-        exit(1)
+        sys.exit(1)
 
     if session.options.recursive:
         print_rec(datafiles["children"], 0)
@@ -74,10 +74,10 @@ def list_all_projects(session) -> None:
         for i in projects["projects"]:
             print(i)
         if response.status_code != 200:
-            exit(1)
+            sys.exit(1)
     except (json.decoder.JSONDecodeError, KeyError):
         print_error(f"[get_listing] Error reading response: {response.text}")
-        exit(1)
+        sys.exit(1)
 
 
 def get_list(res, session_dir):
