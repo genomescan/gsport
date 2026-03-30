@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 from getpass import getpass
 from multiprocessing import Queue
@@ -161,8 +162,8 @@ class Session:
                 print_info("[logout] Logged out.")
             else:
                 print_error("[logout] Error logging out.")
-                exit(1)
+                sys.exit(1)
             # TODO: Add code to delete cookie from system.
         except FileNotFoundError:
             print_info("[session] No cookies found to clear. exiting...")
-        exit(0)
+        sys.exit(0)

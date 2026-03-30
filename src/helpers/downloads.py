@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Dict, List, Union
 
 import requests
@@ -45,11 +46,11 @@ def download(session) -> None:
         )
         datafiles = response.json()
     else:
-        exit(1)
+        sys.exit(1)
 
     if response.status_code != 200:
         print_error(response.text)
-        exit(1)
+        sys.exit(1)
 
     if session.options.download:
         requested = session.options.download
@@ -67,9 +68,9 @@ def download(session) -> None:
                 datafiles.append(allowed[file])
         if not len(datafiles) > 0:
             print("No valid files to download")
-            exit(1)
+            sys.exit(1)
         if input("Continuing on with the download of the existing files? (y/n)") != "y":
-            exit(1)
+            sys.exit(1)
 
     if not os.path.isdir(
         session.options.output
