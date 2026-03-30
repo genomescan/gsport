@@ -11,6 +11,7 @@
             {
               "name": "3660_Color_palette (1).pdf",
               "size": "517.9KB",
+              "file_status": "perm_deleted",
               "children": []
             }
           ]
@@ -22,11 +23,13 @@
             {
               "name": "test_10G.txt",
               "size": "10.0GB",
+              "file_status": "perm_deleted",
               "children": []
             },
             {
               "name": "test2_10G.txt",
               "size": "10.0GB",
+              "file_status": "perm_deleted",
               "children": []
             }
           ]

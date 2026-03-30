@@ -65,7 +65,7 @@ def download(session: Session) -> None:
             file = f"{session.options.project}/{file}"
             if file not in allowed:
                 print_warning(
-                    f"WARNING: {file} is not a valid file for download, make sure the path is spelled correctly."
+                    f"WARNING: {file} is not a valid file for download or it has expired, make sure the path is spelled correctly."
                 )
                 continue
             if file in allowed:
