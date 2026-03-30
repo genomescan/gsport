@@ -99,7 +99,7 @@ def print_only_files(project_code: str, data: Dict):
                 print(
                     "└── "
                     + file["name"]
-                    + " Size:  "
+                    + " Size: "
                     + format_size(str(file["size"]))
                     + " Status: "
                     + str(file["file_status"])
