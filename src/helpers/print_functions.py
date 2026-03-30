@@ -69,7 +69,12 @@ def print_rec(dic, depth: int = 0) -> None:
                 )
             else:
                 print(
-                    "├── " + file["name"] + " Size:  " + str(file["size"]),
+                    "├── "
+                    + file["name"]
+                    + " Size: "
+                    + format_size(str(file["size"]))
+                    + " Status: "
+                    + str(file["file_status"]),
                 )
 
 
@@ -91,9 +96,15 @@ def print_only_files(project_code: str, data: Dict):
                     colored(text=str(file["file_status"]), color="red"),
                 )
             else:
-                print("└──", file["name"] + " Size:  " + format_size(str(file["size"])))
+                print(
+                    "└── "
+                    + file["name"]
+                    + " Size:  "
+                    + format_size(str(file["size"]))
+                    + " Status: "
+                    + str(file["file_status"])
+                )
     if file_count == 0:
-        # TODO: Mention this somewhere else in documentation, mb remove if we do not want to print nothing
         print(
             colored(
                 text="No files were found in the project root directory", color="yellow"
@@ -122,4 +133,11 @@ def print_folders(data: Dict) -> None:
                         colored(text=str(file["file_status"]), color="red"),
                     )
                 else:
-                    print(file["name"])
+                    print(
+                        "└──",
+                        file["name"],
+                        "Size: ",
+                        format_size(str(file["size"])),
+                        "Status: ",
+                        str(file["file_status"]),
+                    )

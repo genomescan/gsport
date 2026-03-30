@@ -4,8 +4,8 @@ from typing import Dict
 def is_file(file: Dict) -> bool:
     """
         Check if a row entry is a file. Serves as substitute for the type field removal in the new customer portal
-    :param session: Session object.
-    :return: None
+    :param file: File entry dictionary.
+    :return: True if the entry represents a file, False otherwise.
     """
     return file["size"] is not None
 

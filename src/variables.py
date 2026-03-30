@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 GSPORT_VERSION = "3.0"
@@ -11,8 +12,7 @@ TWO_FACTOR_AUTH_URL = "login/two-factor"
 LIST_RECURSIVE = "api/projects/"
 DOWNLOAD_RECURSIVE = "/data_api_recursive/"
 LOGOUT_URL = "api/logout"
-# HOST_URL = "https://gs-vm-portal-dev/"
-HOST_URL = "http://127.0.0.1:8000/"
+HOST_URL = os.getenv("HOST_URL", "https://gs-vm-portal-dev/")
 VERIFY_FILES_URL = "api/downloads/"
 DOWNLOAD_FILE_URL = "api/downloads/verify/"
 
