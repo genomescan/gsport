@@ -74,7 +74,6 @@ class Session:
                 self.options.host + LOGIN_URL,
                 data=login_data,
                 headers=dict(Referer=self.options.host + LOGIN_URL),
-                verify=False,
             )
             # try to log in.
             if response.status_code != 200:

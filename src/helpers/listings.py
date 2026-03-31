@@ -1,13 +1,9 @@
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Dict
 
 import requests
-
-if sys.version_info >= (3, 10, 0):
-    from terminalcolorpy import colored
 
 from src.classes.session import Session
 from src.helpers.print_functions import (
@@ -16,6 +12,7 @@ from src.helpers.print_functions import (
     print_info,
     print_only_files,
     print_rec,
+    print_warning,
 )
 from src.helpers.utils import is_file
 from src.variables import ALL_PROJECTS_API, LIST_RECURSIVE
@@ -38,15 +35,12 @@ def get_listing(session: Session) -> None:
     if response.status_code == 200:
         datafiles = json.loads(response.text)
     elif response.status_code == 404:
-        print(
-            colored(
-                text="No files were found, make sure project and/or directory are correct",
-                color="yellow",
-            )
+        print_warning(
+            "No files were found, make sure project and/or directory are correct"
         )
         exit(1)
     elif response.status_code == 403:
-        print(colored(text="You are not allowed to access that project", color="red"))
+        print_error("You are not allowed to access that project")
         exit(1)
     else:
         print_error(f"[get_listing] Error reading response: {response.text}")
@@ -62,9 +56,7 @@ def get_listing(session: Session) -> None:
             print_only_files(session.options.project, datafiles["data"][0]["children"])
             return
         else:
-            print(
-                colored(text=session.options.project, color="cyan"),
-            )
+            print_info(session.options.project)
             print_folders(datafiles["data"][0]["children"])
 
 
@@ -81,7 +73,7 @@ def list_all_projects(session) -> None:
     )
     try:
         projects = response.json()
-        for i in projects["projects"]:
+        for i in projects["response"]:
             print(i)
         if response.status_code != 200:
             exit(1)
@@ -121,9 +113,7 @@ def print_dir(data: Dict, session: Session, directory: str) -> None:
     for file in data:
         if not is_file(file):
             if file["name"] == dir_parts[0]:
-                print(
-                    colored(text=file["name"], color="cyan"),
-                )
+                print_info(file["name"])
                 if len(dir_parts) > 1:
                     print_dir(file["children"], session, dir_parts[1])
                     return

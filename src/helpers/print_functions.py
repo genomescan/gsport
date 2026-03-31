@@ -80,7 +80,7 @@ def print_rec(dic, depth: int = 0) -> None:
 
 def print_only_files(project_code: str, data: Dict):
     if project_code is not None:
-        print(colored(text=project_code, color="cyan"))
+        print_info(project_code)
 
     file_count = 0
     for file in data:
@@ -105,11 +105,7 @@ def print_only_files(project_code: str, data: Dict):
                     + str(file["file_status"])
                 )
     if file_count == 0:
-        print(
-            colored(
-                text="No files were found in the project root directory", color="yellow"
-            )
-        )
+        print_warning("No files were found in the project root directory")
 
 
 def print_folders(data: Dict) -> None:
