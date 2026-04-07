@@ -33,7 +33,11 @@ def get_listing(session: Session) -> None:
         },
     )
     if response.status_code == 200:
-        datafiles = json.loads(response.text)
+        try:
+            datafiles = json.loads(response.text)
+        except json.decoder.JSONDecodeError:
+            print_error(f"[get_listing] Error reading response: {response.text}")
+            exit(1)
     elif response.status_code == 404:
         print_warning(
             "No files were found, make sure project and/or directory are correct"
@@ -116,10 +120,9 @@ def print_dir(data: Dict, session: Session, directory: str) -> None:
                 print_info(file["name"])
                 if len(dir_parts) > 1:
                     print_dir(file["children"], session, dir_parts[1])
-                    return
-                if session.options.recursive:
+                elif session.options.recursive:
                     print_rec(file["children"], 1)
-                if session.options.folder_mode:
+                elif session.options.folder_mode:
                     print_folders(file["children"])
                 else:
                     print_only_files(None, file["children"])

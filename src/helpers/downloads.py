@@ -98,11 +98,16 @@ def download(session: Session) -> None:
 def simplify_path(
     datafiles: List[Dict[str, Union[str, int]]],
 ) -> List[Dict[str, Union[str, int]]]:
-    """Function to remove the project code from the project path. It is used to mimic the old gsport version file handling"""
+    """Remove a leading project directory from file paths while preserving already-relative names."""
     for file in datafiles:
-        path = file["name"].split("/")
-        subdirectories = path[1:]
-        file["name"] = "/".join(subdirectories)
+        name = str(file["name"])
+        path = name.split("/")
+        if len(path) > 1:
+            subdirectories = path[1:]
+            if subdirectories:
+                file["name"] = "/".join(subdirectories)
+        else:
+            file["name"] = name
     return datafiles
 
 
