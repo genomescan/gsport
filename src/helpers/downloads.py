@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -17,44 +17,51 @@ def _get_file_names(files: List[Dict[str, str]]) -> Dict[str, Dict[str, str]]:
     return file_names
 
 
+def _normalize_dir(session: Session) -> None:
+    """Prepend the project name to the directory path if it isn't already included."""
+    if (
+        session.options.dir.split("/")[0] != session.options.project
+        and session.options.dir != "./"
+    ):
+        session.options.dir = session.options.project + "/" + session.options.dir
+
+
+def _fetch_datafiles(session: Session) -> Optional[requests.Response]:
+    """
+    Perform the appropriate API request based on the session download options.
+
+    Returns the response object, or None if no valid download option was set.
+    """
+    base_url = session.options.host + DOWNLOAD_FILE_URL + session.options.project
+    params = {"cd": session.options.dir}
+    kwargs = {"cookies": session.cookies, "params": params}
+
+    if session.options.download or (
+        session.options.download_all and session.options.recursive
+    ):
+        return requests.get(base_url + "/recursive", **kwargs)
+    elif session.options.download_all:
+        return requests.get(base_url + "/dirs", **kwargs)
+
+    return None
+
+
 def download(session: Session) -> None:
     """
         Verify the files specified with the download command and passes the approved files to the get url.
     :param session: The session object.
     :return: None
     """
-    if (
-        session.options.dir.split("/")[0] != session.options.project
-        and session.options.dir != "./"
-    ):
-        session.options.dir = session.options.project + "/" + session.options.dir
-    datafiles = []
-    if session.options.download or (
-        session.options.download_all and session.options.recursive
-    ):
-        response = requests.get(
-            session.options.host
-            + DOWNLOAD_FILE_URL
-            + session.options.project
-            + "/recursive",
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-    elif session.options.download_all:
-        response = requests.get(
-            session.options.host
-            + DOWNLOAD_FILE_URL
-            + session.options.project
-            + "/dirs",
-            cookies=session.cookies,
-            params={"cd": session.options.dir},
-        )
-    else:
+    _normalize_dir(session)
+
+    response = _fetch_datafiles(session)
+    if response is None:
         exit(1)
 
     if response.status_code != 200:
         print_error(response.text)
         exit(1)
+
     datafiles = get_list(response.json(), session.options.output)
     if session.options.download:
         requested = session.options.download
