@@ -65,7 +65,7 @@ class Session:
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
-            email = input("Username: ")
+            email = input("Email: ")
             psw = getpass()
             login_data = dict(
                 email=email, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
@@ -109,6 +109,7 @@ class Session:
         """
             Download the file by streaming the dat from the url.
         :param url: The download link.
+        :param params: Parameters of the download.
         :param fsize: The file size in bytes.
         :param fname: The filename.
         :return: None

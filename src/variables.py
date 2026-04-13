@@ -1,16 +1,13 @@
 import os
-from pathlib import Path
 
 GSPORT_VERSION = "3.0"
 CLIENT_VERSION = f"GS_{GSPORT_VERSION}"
 
-ROOT_DIR = Path(__file__).parent.parent
 ALL_PROJECTS_API = "api/projects"
 LOGIN_URL = "login/"
 LOGGED_IN_URL = "login/logged-in"
 TWO_FACTOR_AUTH_URL = "login/two-factor"
 LIST_RECURSIVE = "api/projects/"
-DOWNLOAD_RECURSIVE = "/data_api_recursive/"
 LOGOUT_URL = "api/logout"
 HOST_URL = os.getenv("HOST_URL", "https://gs-vm-portal-dev/")
 VERIFY_FILES_URL = "api/downloads/"

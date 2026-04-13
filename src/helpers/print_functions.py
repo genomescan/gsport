@@ -1,5 +1,5 @@
 import sys
-from typing import Dict
+from typing import Any, Dict, List
 
 from src.helpers.utils import format_size, is_file
 
@@ -78,7 +78,7 @@ def print_rec(dic, depth: int = 0) -> None:
                 )
 
 
-def print_only_files(project_code: str, data: Dict):
+def print_only_files(project_code: str, data: List[Dict[str, Any]]) -> None:
     if project_code is not None:
         print_info(project_code)
 
