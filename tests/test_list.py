@@ -70,9 +70,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = (
-                    "[session] cookies found.\n999\n└──test_map_salah\n└──test_999\n"
-                )
+                expected_output = "[session] cookies found.\n999\n    └──test_map_salah\n    └──test_999\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -113,7 +111,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n└── test_10G.txt Size:  010.0GB Status:  perm_deleted\n└── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
+                expected_output = "[session] cookies found.\n999\n    └──test_map_salah\n    ├──test_10G.txt Size: 10.0GB Status: perm_deleted\n    ├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -154,7 +152,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n└──test_map_salah\n└── test_10G.txt Size:  010.0GB Status:  perm_deleted\n└── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
+                expected_output = "[session] cookies found.\n999\n    └──test_map_salah\n    ├──test_10G.txt Size: 10.0GB Status: perm_deleted\n    ├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
@@ -195,7 +193,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n999\n    └── test_map_salah\n        ├── 3660_Color_palette (1).pdf Size:  517.9KB Status:  perm_deleted\n    ├── test_10G.txt Size:  010.0GB Status:  perm_deleted\n    ├── test2_10G.txt Size:  010.0GB Status:  perm_deleted\n"
+                expected_output = "[session] cookies found.\n999\n    └──test_map_salah\n        ├──3660_Color_palette (1).pdf Size: 517.9KB Status: perm_deleted\n    ├──test_10G.txt Size: 10.0GB Status: perm_deleted\n    ├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
