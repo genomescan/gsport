@@ -1,139 +1,75 @@
 import sys
-from typing import Any, Dict, List
+from typing import Dict
 
-from src.helpers.utils import format_size, is_file
+from src.helpers.utils import is_file
 
 if sys.version_info >= (3, 10, 0):
-    from terminalcolorpy import colored, printcolor
+    from terminalcolorpy import printcolor
 
 
-def print_error(text: str) -> None:
+def print_error(text: str, end="\n") -> None:
     if sys.version_info >= (3, 10, 0):
-        printcolor({"text": text, "color": "red"})
+        printcolor({"text": text, "color": "red"}, end=end)
     else:
-        print(text)
+        print(text, end=end)
 
 
-def print_info(text: str) -> None:
+def print_info(text: str, end="\n") -> None:
     if sys.version_info >= (3, 10, 0):
-        printcolor({"text": text, "color": "cyan"})
+        printcolor({"text": text, "color": "cyan"}, end=end)
     else:
-        print(text)
+        print(text, end=end)
 
 
-def print_warning(text: str) -> None:
+def print_warning(text: str, end="\n") -> None:
     if sys.version_info >= (3, 10, 0):
-        printcolor({"text": text, "color": "yellow"})
+        printcolor({"text": text, "color": "yellow"}, end=end)
     else:
-        print(text)
+        print(text, end=end)
 
 
-def print_file(text: str) -> None:
+def print_file(text: str, end="\n") -> None:
     if sys.version_info >= (3, 10, 0):
-        printcolor({"text": text, "color": "green"})
+        printcolor({"text": text, "color": "green"}, end=end)
     else:
-        print(text)
+        print(text, end=end)
 
 
-def print_rec(dic, depth: int = 0) -> None:
+def print_rec(
+    data: Dict, show_md5: bool, depth: int = 0, dirs: str = "", max_depth=None
+) -> None:
     """
-        Prints the folder structure as returned from the api.
-    :param dic: An iterable containing dictionaries with the keys "children", "size" and "name".
-    :param depth: The recursive depth.
-    :return: None
+    Prints folder structure recursively
     """
-    for file in dic:
+    if max_depth is not None and max_depth < depth:
+        return
+    for file in data:
         if not is_file(file):
-            for i in range(depth * 2):
-                print("  ", end="")
-            if sys.version_info >= (3, 10, 0):
-                if depth == 0:
-                    print(colored(text=file["name"], color="cyan"))
-                else:
-                    print("└──", colored(text=file["name"], color="cyan"))
-            else:
-                print("└── " + file["name"])
-            print_rec(file["children"], depth + 1)
+            if not show_md5:
+                for _ in range(depth * 2):
+                    print("  ", end="")
+            if not show_md5:
+                if depth != 0:
+                    print("└──", end="")
+            if not show_md5:
+                print_info(file["name"])
+            print_rec(
+                file["children"],
+                show_md5,
+                depth + 1,
+                f"{dirs}{file['name']}/",
+                max_depth=max_depth,
+            )
         else:
-            for i in range(depth * 2):
-                print("  ", end="")
-
-            if sys.version_info >= (3, 10, 0):
-                print(
-                    "├──",
-                    colored(text=file["name"], color="yellow"),
-                    "Size: ",
-                    colored(text=format_size(str(file["size"])), color="red"),
-                    "Status: ",
-                    colored(text=str(file["file_status"]), color="red"),
-                )
+            for _ in range(depth * 2):
+                if not show_md5:
+                    print("  ", end="")
+            if show_md5:
+                print(f"{file['md5']}  {dirs}{file['name']}")
             else:
-                print(
-                    "├── "
-                    + file["name"]
-                    + " Size: "
-                    + format_size(str(file["size"]))
-                    + " Status: "
-                    + str(file["file_status"]),
-                )
-
-
-def print_only_files(project_code: str, data: List[Dict[str, Any]]) -> None:
-    if project_code is not None:
-        print_info(project_code)
-
-    file_count = 0
-    for file in data:
-        if is_file(file):
-            file_count += 1
-            if sys.version_info >= (3, 10, 0):
-                print(
-                    "└──",
-                    colored(text=file["name"], color="yellow"),
-                    "Size: ",
-                    colored(text=format_size(str(file["size"])), color="red"),
-                    "Status: ",
-                    colored(text=str(file["file_status"]), color="red"),
-                )
-            else:
-                print(
-                    "└── "
-                    + file["name"]
-                    + " Size: "
-                    + format_size(str(file["size"]))
-                    + " Status: "
-                    + str(file["file_status"])
-                )
-    if file_count == 0:
-        print_warning("No files were found in the project root directory")
-
-
-def print_folders(data: Dict) -> None:
-    for file in data:
-        if len(file["name"]) > 0:
-            if not is_file(file):
-                if sys.version_info >= (3, 10, 0):
-                    print(
-                        "└──" + colored(text=file["name"], color="cyan"),
-                    )
-                else:
-                    print(file["name"])
-            else:
-                if sys.version_info >= (3, 10, 0):
-                    print(
-                        "└──",
-                        colored(text=file["name"], color="yellow"),
-                        "Size: ",
-                        colored(text=format_size(str(file["size"])), color="red"),
-                        "Status: ",
-                        colored(text=str(file["file_status"]), color="red"),
-                    )
-                else:
-                    print(
-                        "└──",
-                        file["name"],
-                        "Size: ",
-                        format_size(str(file["size"])),
-                        "Status: ",
-                        str(file["file_status"]),
-                    )
+                print("├──", end="")
+                print_warning(file["name"], end="")
+                print(" Size: ", end="")
+                print_error(file["size"], end="")
+                print(" Status: ", end="")
+                print_error(file["file_status"])

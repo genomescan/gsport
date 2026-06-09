@@ -17,6 +17,4 @@ def format_size(size: str) -> str:
     :return: Formatted size string
     """
     size, dec = size.split(".", 1)
-    while len(size) < 3:
-        size = f"0{size}"
     return f"{size}.{dec}"

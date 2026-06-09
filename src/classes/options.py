@@ -82,6 +82,13 @@ class Options:
             description="this subcommand prints the output",
             epilog=LIST_EXAMPLE_MESSAGE,
             parents=[project_parser, download_and_listing_shared],
+        ) 
+        subparser_list.add_argument(
+            "-md5",
+            "--md5sums",
+            action="store_true",
+            default=False,
+            help="Print a flat list of the paths and md5sums for all files within the list command",
         )
         list_options_group = subparser_list.add_mutually_exclusive_group()
         list_options_group.add_argument(
@@ -105,7 +112,7 @@ class Options:
             parents=[project_parser, downloads_shared],
         )
         subparser_download.add_argument(
-            "FILE", help="files to download seperated by spaces", nargs="+"
+            "FILE", help="files to download separated by spaces", nargs="+"
         )
         subparser_download.set_defaults(func=self.D)
 
@@ -143,6 +150,7 @@ class Options:
         self.project: str | None = (
             None  # The projectcode that the user requests things from.
         )
+        self.show_md5 = False
         self.clear_cookies: bool = (
             args.clear_cookies
         )  # Clear the cookies, must be logged in to clear cookies.
@@ -171,6 +179,7 @@ class Options:
         self.recursive = args.recursive
         self.project = args.PROJECT
         self.listing = True
+        self.show_md5 = args.md5sums
 
     def A(self, args):
         """

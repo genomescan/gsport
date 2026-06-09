@@ -9,7 +9,7 @@ on:
   push:
 jobs:
   run-flake8: # running flake8 --> both are separated now
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code # checking out the code at current commit that triggers the workflow
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   run-tests: # running tests
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code # checking out the code at current commit that triggers the workflow
         uses: actions/checkout@v4
