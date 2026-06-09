@@ -3,9 +3,9 @@ from unittest.mock import patch
 
 import requests_mock
 
-from src.variables import HOST_URL, LOGGED_IN_URL
 from main import main
 from src.classes import Session
+from src.variables import HOST_URL, LOGGED_IN_URL
 
 """
 Tests for the login process

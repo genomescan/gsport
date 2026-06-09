@@ -82,7 +82,7 @@ class Options:
             description="this subcommand prints the output",
             epilog=LIST_EXAMPLE_MESSAGE,
             parents=[project_parser, download_and_listing_shared],
-        ) 
+        )
         subparser_list.add_argument(
             "-md5",
             "--md5sums",
