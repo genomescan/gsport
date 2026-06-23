@@ -1,25 +1,28 @@
 {
-  "name": "test_999",
-  "type": "directory",
-  "children": [
-    {"name": "test_map_salah",
-      "type": "directory",
+  "data": [
+    {
+      "name": "test_map_salah",
+      "size": null,
       "children": [
         {
           "name": "3660_Color_palette (1).pdf",
-          "type": "file",
-          "size": 517854
-        }]
+          "size": "517.9KB",
+          "file_status": "perm_deleted",
+          "children": []
+        }
+      ]
     },
     {
       "name": "test_10G.txt",
-      "type": "file",
-      "size": 10737418240
+      "size": "10.0GB",
+      "file_status": "perm_deleted",
+      "children": []
     },
     {
       "name": "test2_10G.txt",
-      "type": "file",
-      "size": 10737418240
+      "size": "10.0GB",
+      "file_status": "perm_deleted",
+      "children": []
     }
   ]
 }

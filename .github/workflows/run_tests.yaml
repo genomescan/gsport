@@ -7,10 +7,6 @@ on:
       - master
       - develop
   push:
-    branches:
-      - feature/*
-      - develop
-      - master
 jobs:
   run-flake8: # running flake8 --> both are separated now
     runs-on: ubuntu-latest

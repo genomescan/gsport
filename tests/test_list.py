@@ -7,6 +7,7 @@ from unittest.mock import mock_open, patch
 import requests_mock
 
 from main import main
+from src.variables import HOST_URL, LIST_RECURSIVE, LOGGED_IN_URL
 
 """
 Tests for the list command
@@ -47,7 +48,7 @@ class TestListcommand(unittest.TestCase):
         with patch("builtins.open", cookie_mock):
             with requests_mock.Mocker() as m:
                 m.get(
-                    "https://portal.genomescan.nl//logged_in_api/",
+                    f"{HOST_URL}{LOGGED_IN_URL}",
                     text='{"logged_in": true}',
                     status_code=200,
                 )
@@ -58,7 +59,7 @@ class TestListcommand(unittest.TestCase):
                     recursive_mock = recursive_mock_file.read()
 
                 m.get(
-                    "https://portal.genomescan.nl//data_api_recursive/999?cd=.%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=recursive_mock,
                 )
 
@@ -75,7 +76,7 @@ class TestListcommand(unittest.TestCase):
                     self.remove_ansi_escape_sequences(captured), expected_output
                 )
 
-    @patch("sys.argv", ["script_name", "list", "999", "-d", "test_999"])
+    @patch("sys.argv", ["script_name", "list", "999"])
     @patch("http.cookiejar.MozillaCookieJar.load")
     def test_show_files_from_project(self, mock_load):
         """
@@ -88,7 +89,7 @@ class TestListcommand(unittest.TestCase):
         with patch("builtins.open", cookie_mock):
             with requests_mock.Mocker() as m:
                 m.get(
-                    "https://portal.genomescan.nl//logged_in_api/",
+                    f"{HOST_URL}{LOGGED_IN_URL}",
                     text='{"logged_in": true}',
                     status_code=200,
                 )
@@ -99,7 +100,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    "https://portal.genomescan.nl//data_api_recursive/999?cd=test_999%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
@@ -110,13 +111,13 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\ntest_10G.txt Size:  10737418240\ntest2_10G.txt Size:  10737418240\n"
+                expected_output = "[session] cookies found.\ntest_map_salah\n├──test_10G.txt Size: 10.0GB Status: perm_deleted\n├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
                 )
 
-    @patch("sys.argv", ["script_name", "list", "999", "-m", "-d", "test_999"])
+    @patch("sys.argv", ["script_name", "list", "999", "-m"])
     @patch("http.cookiejar.MozillaCookieJar.load")
     def test_show_files_folders_from_project(self, mock_load):
         """
@@ -129,7 +130,7 @@ class TestListcommand(unittest.TestCase):
         with patch("builtins.open", cookie_mock):
             with requests_mock.Mocker() as m:
                 m.get(
-                    "https://portal.genomescan.nl//logged_in_api/",
+                    f"{HOST_URL}{LOGGED_IN_URL}",
                     text='{"logged_in": true}',
                     status_code=200,
                 )
@@ -140,7 +141,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    "https://portal.genomescan.nl//data_api_recursive/999?cd=test_999%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
@@ -151,13 +152,13 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\ntest_map_salah\ntest_10G.txt\ntest2_10G.txt\n"
+                expected_output = "[session] cookies found.\ntest_map_salah\n├──test_10G.txt Size: 10.0GB Status: perm_deleted\n├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output
                 )
 
-    @patch("sys.argv", ["script_name", "list", "999", "-r", "-d", "test_999"])
+    @patch("sys.argv", ["script_name", "list", "999", "-r"])
     @patch("http.cookiejar.MozillaCookieJar.load")
     def test_show_project_recursively(self, mock_load):
         """
@@ -170,7 +171,7 @@ class TestListcommand(unittest.TestCase):
         with patch("builtins.open", cookie_mock):
             with requests_mock.Mocker() as m:
                 m.get(
-                    "https://portal.genomescan.nl//logged_in_api/",
+                    f"{HOST_URL}{LOGGED_IN_URL}",
                     text='{"logged_in": true}',
                     status_code=200,
                 )
@@ -181,7 +182,7 @@ class TestListcommand(unittest.TestCase):
                     project_files = project_files.read()
 
                 m.get(
-                    "https://portal.genomescan.nl//data_api_recursive/999?cd=test_999%2F",
+                    f"{HOST_URL}{LIST_RECURSIVE}999?cd=999",
                     text=project_files,
                 )
 
@@ -192,7 +193,7 @@ class TestListcommand(unittest.TestCase):
 
                 captured = captured.getvalue()
 
-                expected_output = "[session] cookies found.\n└── test_map_salah\n    ├── 3660_Color_palette (1).pdf Size:  517854\n├── test_10G.txt Size:  10737418240\n├── test2_10G.txt Size:  10737418240\n"
+                expected_output = "[session] cookies found.\ntest_map_salah\n    ├──3660_Color_palette (1).pdf Size: 517.9KB Status: perm_deleted\n├──test_10G.txt Size: 10.0GB Status: perm_deleted\n├──test2_10G.txt Size: 10.0GB Status: perm_deleted\n"
 
                 self.assertEqual(
                     self.remove_ansi_escape_sequences(captured), expected_output

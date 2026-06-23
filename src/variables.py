@@ -1,13 +1,18 @@
-GSPORT_VERSION = "2.0.1"
-ALL_PROJECTS_API = "get_projects/"
-LOGIN_URL = "/login/"
-LOGGED_IN_URL = "/logged_in_api/"
-TWO_FACTOR_AUTH_URL = "/otp_ok/"
-DOWNLOAD_RECURSIVE = "/data_api_recursive/"
-LOGOUT_URL = "/accounts/logout/"
-HOST_URL = "https://portal.genomescan.nl/"
-VERIFY_FILES_URL = "/gen_session_file/"
-DOWNLOAD_FILE_URL = "/data_api2/"
+import os
+
+GSPORT_VERSION = "3.0"
+CLIENT_VERSION = f"GS_{GSPORT_VERSION}"
+
+ALL_PROJECTS_API = "api/projects"
+LOGIN_URL = "login/"
+LOGGED_IN_URL = "login/logged-in"
+TWO_FACTOR_AUTH_URL = "login/two-factor"
+LIST_RECURSIVE = "api/projects/"
+LOGOUT_URL = "api/logout"
+HOST_URL = os.getenv("HOST_URL", "https://dev.portal.genomescan.nl/")
+VERIFY_FILES_URL = "api/downloads/"
+DOWNLOAD_FILE_URL = "api/downloads/verify/"
+
 
 LIST_EXAMPLE_MESSAGE = """
 example usage:

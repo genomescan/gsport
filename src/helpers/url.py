@@ -1,10 +1,8 @@
 import os
 from typing import Dict, List, Union
 
-import requests
-
 from src.helpers.parallel_download import download_parallel
-from src.variables import VERIFY_FILES_URL
+from src.variables import CLIENT_VERSION, VERIFY_FILES_URL
 
 
 def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
@@ -24,29 +22,18 @@ def get_url(session, datafiles: List[Dict[str, Union[str, int]]]) -> None:
             os.path.join(
                 session.options.output, file["name"].replace("\\", "/").split("/")[-1]
             )
-            if not session.options.recursive
+            if not session.options.dir == "./" and not session.options.recursive
             else os.path.join(session.options.output, os.path.normpath(file["name"]))
         )
-        filename = (
-            "/"
-            + (session.options.dir if not session.options.recursive else "")
-            + "/"
-            + file["name"]
-        )
+        filename = os.path.join(session.options.project, file["name"])
         dl_sum += fsize
         filename = filename.replace("\\", "/")
-        response = requests.get(
-            session.options.host + VERIFY_FILES_URL,
-            cookies=session.cookies,
-            params={"project": session.options.project, "filename": filename},
-        )
-        url = (
-            session.options.host
-            + "/session_files2/"
-            + session.options.project
-            + "/"
-            + response.text
-        )
-        dl_list.append([url, fsize, fname])
+        url = session.options.host + VERIFY_FILES_URL + session.options.project
+        params = {
+            "project": session.options.project,
+            "file": filename,
+            "version": f"{CLIENT_VERSION}",
+        }
+        dl_list.append([url, params, fsize, fname])
 
     download_parallel(session, dl_list, dl_sum)

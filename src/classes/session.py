@@ -4,6 +4,7 @@ import time
 from getpass import getpass
 from multiprocessing import Queue
 from pathlib import Path
+from typing import Dict
 
 import requests
 
@@ -64,10 +65,10 @@ class Session:
         csrftoken = response.cookies["csrftoken"]
         success = False
         while not success:
-            username = input("Username: ")
+            email = input("Email: ")
             psw = getpass()
             login_data = dict(
-                username=username, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
+                email=email, password=psw, csrfmiddlewaretoken=csrftoken, next="/"
             )
             response = session.post(
                 self.options.host + LOGIN_URL,
@@ -81,7 +82,7 @@ class Session:
             login_data = dict(
                 token=input("Token: "),
                 password=psw,
-                username=username,
+                email=email,
                 csrfmiddlewaretoken=csrftoken,
                 next="/",
             )
@@ -104,20 +105,21 @@ class Session:
         print_info("[login] Done.")
         self.cookies = session.cookies
 
-    def download_file(self, url: str, fsize: int, fname: str) -> None:
+    def download_file(self, url: str, params: Dict, fsize: int, fname: str) -> None:
         """
             Download the file by streaming the dat from the url.
         :param url: The download link.
+        :param params: Parameters of the download.
         :param fsize: The file size in bytes.
         :param fname: The filename.
         :return: None
         """
+
         try:
             dsize = 0
             start = time.time()
-
             with requests.get(
-                url, stream=True, cookies=self.cookies
+                url, stream=True, cookies=self.cookies, params=params
             ) as r:  # Start the download.
                 self.options.dir = "/".join(self.options.dir.split("/")[:-1])
 
@@ -138,10 +140,10 @@ class Session:
                                     + str(round(dsize / fsize * 100))
                                     + "% "
                                     + str(size_of_metric_fmt(rate))
-                                    + "/sec ",
-                                    "ETA:",
-                                    human_readable_eta((fsize - dsize) / rate),
-                                    end="     ",
+                                    + "/sec "
+                                    + "ETA:"
+                                    + human_readable_eta((fsize - dsize) / rate),
+                                    end="",
                                 )
                             else:
                                 self.queue.put([len(chunk), False])
