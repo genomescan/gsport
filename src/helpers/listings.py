@@ -47,14 +47,15 @@ def get_listing(session: Session) -> None:
     else:
         print_error(f"[get_listing] Error reading response: {response.text}")
         sys.exit(1)
+    max_depth = 0
     if session.options.dir != "./":
         datafiles["data"] = [
             find_specified_dir(datafiles["data"][0], session.options.dir)
         ]
+        max_depth = 1
     if session.options.recursive:
-        print_rec(datafiles["data"], session.options.show_md5)
-    else:
-        print_rec(datafiles["data"], session.options.show_md5, max_depth=1)
+        max_depth = None
+    print_rec(datafiles["data"], session.options.show_md5, max_depth=max_depth)
 
 
 def list_all_projects(session) -> None:

@@ -61,7 +61,6 @@ def download(session: Session) -> None:
     if response.status_code != 200:
         print_error(response.text)
         exit(1)
-
     datafiles = _list_files(response.json(), session.options.output)
     if session.options.download:
         requested = session.options.download
