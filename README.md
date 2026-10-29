@@ -1,3 +1,7 @@
+
+## WARNING
+**GSport will no longer function after June 2027.** We have a new customer portal that uses a new command line tool. This tool is called [gsfetch](https://github.com/genomescan/gsfetch), please use this tool instead of this one.
+
 # GSport
 
 GSport is a command-line tool designed to accelerate file downloads from the GenomeScan Customer Portal. It leverages multiprocessing to significantly improve download speeds and efficiency. Works on linux, windows and macOS. 
